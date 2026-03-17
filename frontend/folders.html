@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>VMS Docs - Documentos por Categoria</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="panel-body" onload="initFoldersPage()">
+  <div class="bg-grid"></div>
+
+  <div class="layout">
+    <aside class="sidebar glass-card">
+      <div class="sidebar-brand">
+        <div class="brand-badge small">VMS</div>
+        <div>
+          <h2>VMS Docs</h2>
+          <p>Gestão documental</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">Documentos</a>
+        <a href="folders.html" class="active">Por Categoria</a>
+        <a href="upload.html">Enviar Documento</a>
+        <a href="categories.html">Categorias</a>
+        <a href="users.html">Usuários</a>
+        <a href="inbox.html">Recebidos</a>
+        <a href="send.html">Encaminhar</a>
+        <a href="audit.html">Auditoria</a>
+      </nav>
+
+      <button class="btn-danger full" onclick="logout()">Sair</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass-bar">
+        <div>
+          <h1>Documentos por Categoria</h1>
+          <p>Visualize os documentos organizados em pastas</p>
+        </div>
+      </header>
+
+      <section class="glass-card">
+        <h3 class="section-title">Pastas</h3>
+        <div id="foldersGrid" class="folders-grid"></div>
+      </section>
+
+      <section class="glass-card" id="folderDocumentsSection" style="display:none;">
+        <div class="section-header-inline">
+          <div>
+            <h3 id="selectedCategoryTitle">Documentos</h3>
+            <p id="selectedCategoryDescription" class="muted-text"></p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="modern-table" id="categoryDocumentsTable">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Status</th>
+                <th>Arquivo</th>
+                <th>Criado em</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>VMS Docs - Enviar Documento</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="panel-body" onload="bootPage(); loadCategoriesSelect('categoryId');">
+  <div class="bg-grid"></div>
+
+  <div class="layout">
+    <aside class="sidebar glass-card">
+      <div class="sidebar-brand">
+        <div class="brand-badge small">VMS</div>
+        <div>
+          <h2>VMS Docs</h2>
+          <p>Gestão documental</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">Documentos</a>
+        <a class="active" href="upload.html">Enviar Documento</a>
+        <a href="categories.html">Categorias</a>
+        <a href="folders.html">Todos Documentos</a>
+        <a href="users.html">Usuários</a>
+        <a href="inbox.html">Recebidos</a>
+        <a href="send.html">Encaminhar</a>
+        <a href="audit.html">Auditoria</a>
+      </nav>
+
+      <button class="btn-danger full" onclick="logout()">Sair</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass-bar">
+        <div>
+          <h1>Enviar Documento</h1>
+          <p>Cadastro e upload de arquivos</p>
+        </div>
+      </header>
+
+      <section class="glass-card form-card">
+        <div class="form-group">
+          <label for="title">Título</label>
+          <input id="title" placeholder="Ex.: Ofício 001/2026">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Descrição</label>
+          <input id="description" placeholder="Descrição do documento">
+        </div>
+
+        <div class="form-group">
+          <label for="categoryId">Categoria</label>
+          <select id="categoryId"></select>
+        </div>
+
+        <div class="form-group">
+          <label for="file">Arquivo</label>
+          <input id="file" type="file">
+        </div>
+
+        <button class="btn-primary full" onclick="uploadDocument()">Enviar Documento</button>
+        <p id="msg" class="form-message"></p>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+</body>
+</html>

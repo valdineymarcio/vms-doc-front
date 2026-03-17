@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>VMS Docs - Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="panel-body" onload="bootPage(); loadDocuments();">
+  <div class="bg-grid"></div>
+
+  <div class="layout">
+    <aside class="sidebar glass-card">
+      <div class="sidebar-brand">
+        <div class="brand-badge small">VMS</div>
+        <div>
+          <h2>VMS Docs</h2>
+          <p>Gestão documental</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="active" href="dashboard.html">Documentos</a>
+        <a href="upload.html">Enviar Documento</a>
+        <a href="categories.html">Categorias</a>
+        <a href="folders.html">Todos Documentos</a>
+        <a href="users.html">Usuários</a>
+        <a href="inbox.html">Recebidos</a>
+        <a href="send.html">Encaminhar</a>
+        <a href="audit.html">Auditoria</a>
+      </nav>
+
+      <button class="btn-danger full" onclick="logout()">Sair</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass-bar">
+        <div>
+          <h1>Documentos</h1>
+          <p>Consulta, busca, download e assinatura</p>
+        </div>
+      </header>
+
+      <section class="glass-card">
+        <div class="toolbar">
+          <input id="search" placeholder="Buscar por título...">
+          <button class="btn-primary" onclick="searchDocuments()">Buscar</button>
+          <button class="btn-secondary" onclick="loadDocuments()">Limpar</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="modern-table" id="documentsTable">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Status</th>
+                <th>Arquivo</th>
+                <th>Criado em</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+</body>
+</html>

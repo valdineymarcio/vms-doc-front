@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>VMS Docs - Usuários</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="panel-body" onload="bootPage(); loadUsers();">
+  <div class="bg-grid"></div>
+
+  <div class="layout">
+    <aside class="sidebar glass-card">
+      <div class="sidebar-brand">
+        <div class="brand-badge small">VMS</div>
+        <div>
+          <h2>VMS Docs</h2>
+          <p>Gestão documental</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">Documentos</a>
+        <a href="upload.html">Enviar Documento</a>
+        <a href="categories.html">Categorias</a>
+        <a href="folders.html">Todos Documentos</a>
+        <a class="active" href="users.html">Usuários</a>
+        <a href="inbox.html">Recebidos</a>
+        <a href="send.html">Encaminhar</a>
+        <a href="audit.html">Auditoria</a>
+      </nav>
+
+      <button class="btn-danger full" onclick="logout()">Sair</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass-bar">
+        <div>
+          <h1>Usuários</h1>
+          <p>Cadastro e consulta de usuários</p>
+        </div>
+      </header>
+
+      <section class="grid-2">
+        <div class="glass-card form-card">
+          <h3>Novo Usuário</h3>
+
+          <div class="form-group">
+            <label for="userName">Nome</label>
+            <input id="userName" placeholder="Nome do usuário">
+          </div>
+
+          <div class="form-group">
+            <label for="userEmail">E-mail</label>
+            <input id="userEmail" placeholder="email@dominio.com">
+          </div>
+
+          <div class="form-group">
+            <label for="userPassword">Senha</label>
+            <input id="userPassword" type="password" placeholder="Senha">
+          </div>
+
+          <div class="form-group">
+            <label for="userRole">Perfil</label>
+            <select id="userRole">
+              <option value="ADMIN">ADMIN</option>
+              <option value="USER">USER</option>
+            </select>
+          </div>
+
+          <button class="btn-primary full" onclick="createUser()">Cadastrar</button>
+          <p id="userMsg" class="form-message"></p>
+        </div>
+
+        <div class="glass-card">
+          <h3>Lista de Usuários</h3>
+          <div class="table-wrapper">
+            <table class="modern-table" id="usersTable">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>VMS Docs - Auditoria</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="panel-body" onload="bootPage(); loadAudit();">
+  <div class="bg-grid"></div>
+
+  <div class="layout">
+    <aside class="sidebar glass-card">
+      <div class="sidebar-brand">
+        <div class="brand-badge small">VMS</div>
+        <div>
+          <h2>VMS Docs</h2>
+          <p>Gestão documental</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">Documentos</a>
+        <a href="upload.html">Enviar Documento</a>
+        <a href="categories.html">Categorias</a>
+        <a href="folders.html">Todos Documentos</a>
+        <a href="users.html">Usuários</a>
+        <a href="inbox.html">Recebidos</a>
+        <a href="send.html">Encaminhar</a>
+        <a class="active" href="audit.html">Auditoria</a>
+      </nav>
+
+      <button class="btn-danger full" onclick="logout()">Sair</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass-bar">
+        <div>
+          <h1>Auditoria</h1>
+          <p>Histórico de movimentações do sistema</p>
+        </div>
+      </header>
+
+      <section class="glass-card">
+        <div class="table-wrapper">
+          <table class="modern-table" id="auditTable">
+            <thead>
+              <tr>
+                <th>Ação</th>
+                <th>Usuário</th>
+                <th>Documento</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+</body>
+</html>
