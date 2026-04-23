@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>VMS Docs - Encaminhar</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
-<body class="panel-body" onload="bootPage(); loadDocumentsSelect('sendDocumentId'); loadUsersSelect('sendReceiverId');">
+<body class="panel-body" onload="initSendPage()">
   <div class="bg-grid"></div>
 
   <div class="layout">
@@ -21,9 +22,9 @@
 
       <nav class="sidebar-nav">
         <a href="dashboard.html">Documentos</a>
+        <a href="folders.html">Por Categoria</a>
         <a href="upload.html">Enviar Documento</a>
         <a href="categories.html">Categorias</a>
-        <a href="folders.html">Todos Documentos</a>
         <a href="users.html">Usuários</a>
         <a href="inbox.html">Recebidos</a>
         <a class="active" href="send.html">Encaminhar</a>
@@ -37,7 +38,7 @@
       <header class="topbar glass-bar">
         <div>
           <h1>Encaminhar Documento</h1>
-          <p>Envie um documento para outro usuário</p>
+          <p>Visualize, assine e encaminhe o documento na mesma tela</p>
         </div>
       </header>
 
@@ -52,8 +53,28 @@
           <select id="sendReceiverId"></select>
         </div>
 
-        <button class="btn-primary full" onclick="sendDocumentToUser()">Encaminhar</button>
+        <div class="action-row">
+          <button class="btn-secondary" type="button" onclick="previewSelectedDocumentForSend()">Visualizar</button>
+          <button class="btn-primary" type="button" onclick="prepareOwnDocumentSignature()">Assinar</button>
+          <button class="btn-primary" type="button" onclick="sendDocumentToUser()">Encaminhar</button>
+        </div>
+
         <p id="sendMsg" class="form-message"></p>
+      </section>
+
+      <section class="glass-card viewer-card">
+        <div class="viewer-toolbar">
+          <div>
+            <h3 id="sendViewerTitle">Visualização do documento</h3>
+            <p id="sendViewerInfo" class="muted-text">Selecione um documento para visualizar ou assinar.</p>
+          </div>
+          <div class="action-row">
+            <button class="btn-primary" id="confirmOwnSignBtn" type="button" onclick="confirmEmbeddedSignature()" disabled>Confirmar assinatura</button>
+            <button class="btn-secondary" type="button" onclick="clearEmbeddedViewer()">Fechar visualização</button>
+          </div>
+        </div>
+
+        <div id="embeddedPdfContainer" class="pdf-container"></div>
       </section>
     </main>
   </div>

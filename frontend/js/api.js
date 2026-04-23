@@ -1,6 +1,24 @@
 const API = "http://localhost:8080";
 let currentUser = null;
 
+if (typeof pdfjsLib !== "undefined") {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+let embeddedSignState = {
+  mode: null, // "own" | "transfer" | null
+  documentId: null,
+  transferId: null,
+  page: null,
+  x: null,
+  y: null,
+  previewEl: null,
+  targetContainerId: null,
+  targetInfoId: null,
+  targetButtonId: null
+};
+
 function getToken() {
   return localStorage.getItem("token");
 }
@@ -23,7 +41,7 @@ async function apiRequest(path, options = {}) {
   if (response.status === 401) {
     localStorage.removeItem("token");
     window.location.href = "login.html";
-    throw new Error("Sessão expirada. Faça login novamente.");
+    throw new Error("Sessão expirada.");
   }
 
   if (response.status === 403) {
@@ -55,7 +73,12 @@ async function fetchCurrentUser() {
   return currentUser;
 }
 
-async function bootPage(adminOnly = false) {
+async function bootPage(options = {}) {
+  const {
+    adminOnly = false,
+    allowedRoles = []
+  } = options;
+
   const token = getToken();
 
   if (!token) {
@@ -72,6 +95,13 @@ async function bootPage(adminOnly = false) {
       return false;
     }
 
+    if (allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
+      alert("Você não tem permissão para acessar esta página.");
+      window.location.href = "dashboard.html";
+      return false;
+    }
+
+    applyRoleVisibility();
     return true;
   } catch (error) {
     console.error(error);
@@ -79,6 +109,18 @@ async function bootPage(adminOnly = false) {
     window.location.href = "login.html";
     return false;
   }
+}
+
+function applyRoleVisibility() {
+  if (!currentUser) return;
+
+  document.querySelectorAll("[data-admin-only]").forEach(el => {
+    el.style.display = currentUser.role === "ADMIN" ? "" : "none";
+  });
+
+  document.querySelectorAll("[data-user-and-admin]").forEach(el => {
+    el.style.display = ["ADMIN", "USER"].includes(currentUser.role) ? "" : "none";
+  });
 }
 
 function logout() {
@@ -112,6 +154,7 @@ function renderStatus(status) {
   if (status === "SIGNED") return `<span class="status-badge status-signed">ASSINADO</span>`;
   if (status === "READ") return `<span class="status-badge status-read">LIDO</span>`;
   if (status === "SENT") return `<span class="status-badge status-sent">ENVIADO</span>`;
+  if (status === "RETURNED") return `<span class="status-badge status-returned">DEVOLVIDO</span>`;
   return `<span class="status-badge status-pending">PENDENTE</span>`;
 }
 
@@ -125,7 +168,7 @@ function formatDate(dateString) {
 ========================= */
 
 async function initDashboard() {
-  const ok = await bootPage(false);
+  const ok = await bootPage({ allowedRoles: ["ADMIN", "USER"] });
   if (!ok) return;
   loadDocuments();
 }
@@ -138,6 +181,7 @@ async function loadDocuments() {
     });
 
     const tbody = document.querySelector("#documentsTable tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     data.forEach(doc => {
@@ -150,10 +194,6 @@ async function loadDocuments() {
           <td>
             <div class="action-row">
               <button class="btn-secondary small-btn" onclick="downloadDocument('${doc.id}')">Download</button>
-              ${currentUser.role === "ADMIN" && doc.status !== "SIGNED"
-                ? `<button class="btn-primary small-btn" onclick="window.location.href='sign-document.html?id=${doc.id}'">Assinar</button>
-`
-                : ""}
             </div>
           </td>
         </tr>
@@ -174,6 +214,7 @@ async function searchDocuments() {
     });
 
     const tbody = document.querySelector("#documentsTable tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     data.forEach(doc => {
@@ -186,10 +227,6 @@ async function searchDocuments() {
           <td>
             <div class="action-row">
               <button class="btn-secondary small-btn" onclick="downloadDocument('${doc.id}')">Download</button>
-              ${currentUser.role === "ADMIN" && doc.status !== "SIGNED"
-                ? `<button class="btn-primary small-btn" onclick="window.location.href='sign-document.html?id=${doc.id}'">Assinar</button>
-`
-                : ""}
             </div>
           </td>
         </tr>
@@ -205,7 +242,7 @@ async function searchDocuments() {
 ========================= */
 
 async function initUploadPage() {
-  const ok = await bootPage(true);
+  const ok = await bootPage({ allowedRoles: ["ADMIN", "USER"] });
   if (!ok) return;
   loadCategoriesSelect("categoryId");
 }
@@ -236,7 +273,7 @@ async function uploadDocument() {
 
     msg.innerText = "Documento enviado com sucesso.";
   } catch (error) {
-    msg.innerText = "Erro ao enviar documento.";
+    msg.innerText = error.message || "Erro ao enviar documento.";
     console.error(error);
   }
 }
@@ -246,7 +283,7 @@ async function uploadDocument() {
 ========================= */
 
 async function initCategoriesPage() {
-  const ok = await bootPage(false);
+  const ok = await bootPage({ allowedRoles: ["ADMIN", "USER"] });
   if (!ok) return;
 
   loadCategories();
@@ -265,6 +302,7 @@ async function loadCategories() {
     });
 
     const tbody = document.querySelector("#categoriesTable tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     data.forEach(cat => {
@@ -326,7 +364,7 @@ async function loadCategoriesSelect(selectId) {
 ========================= */
 
 async function initUsersPage() {
-  const ok = await bootPage(true);
+  const ok = await bootPage({ allowedRoles: ["ADMIN"] });
   if (!ok) return;
   loadUsers();
 }
@@ -363,6 +401,7 @@ async function loadUsers() {
     });
 
     const tbody = document.querySelector("#usersTable tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     data.forEach(user => {
@@ -433,19 +472,6 @@ async function downloadDocument(id) {
   }
 }
 
-async function signDocument(id) {
-  try {
-    await apiRequest(`/api/documents/${id}/sign`, {
-      method: "PATCH",
-      headers: authHeaders(false)
-    });
-
-    loadDocuments();
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 async function loadDocumentsSelect(selectId) {
   const select = document.getElementById(selectId);
   if (!select) return;
@@ -470,11 +496,57 @@ async function loadDocumentsSelect(selectId) {
 ========================= */
 
 async function initSendPage() {
-  const ok = await bootPage(true);
+  const ok = await bootPage({ allowedRoles: ["ADMIN", "USER"] });
   if (!ok) return;
 
   loadDocumentsSelect("sendDocumentId");
   loadUsersSelect("sendReceiverId");
+  clearEmbeddedViewer();
+}
+
+async function previewSelectedDocumentForSend() {
+  const documentId = document.getElementById("sendDocumentId").value;
+
+  if (!documentId) {
+    alert("Selecione um documento.");
+    return;
+  }
+
+  try {
+    await openEmbeddedViewer({
+      mode: "view",
+      documentId: documentId,
+      transferId: null,
+      containerId: "embeddedPdfContainer",
+      infoId: "sendViewerInfo",
+      titleId: "sendViewerTitle",
+      buttonId: "confirmOwnSignBtn",
+      titleText: "Visualização do documento"
+    });
+  } catch (error) {
+    console.error("Erro ao visualizar documento:", error);
+    const info = document.getElementById("sendViewerInfo");
+    if (info) info.innerText = "Erro ao carregar documento para visualização.";
+  }
+}
+
+async function prepareOwnDocumentSignature() {
+  const documentId = document.getElementById("sendDocumentId").value;
+  if (!documentId) {
+    alert("Selecione um documento.");
+    return;
+  }
+
+  await openEmbeddedViewer({
+    mode: "own",
+    documentId,
+    transferId: null,
+    containerId: "embeddedPdfContainer",
+    infoId: "sendViewerInfo",
+    titleId: "sendViewerTitle",
+    buttonId: "confirmOwnSignBtn",
+    titleText: "Assinatura do documento"
+  });
 }
 
 async function sendDocumentToUser() {
@@ -483,6 +555,11 @@ async function sendDocumentToUser() {
   const msg = document.getElementById("sendMsg");
 
   msg.innerText = "";
+
+  if (!documentId || !receiverId) {
+    msg.innerText = "Selecione documento e destinatário.";
+    return;
+  }
 
   try {
     await apiRequest(`/api/documents/${documentId}/send`, {
@@ -503,8 +580,9 @@ async function sendDocumentToUser() {
 ========================= */
 
 async function initInboxPage() {
-  const ok = await bootPage(false);
+  const ok = await bootPage({ allowedRoles: ["ADMIN", "USER"] });
   if (!ok) return;
+  clearEmbeddedViewer();
   loadInbox();
 }
 
@@ -516,6 +594,7 @@ async function loadInbox() {
     });
 
     const tbody = document.querySelector("#inboxTable tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     data.forEach(item => {
@@ -527,9 +606,12 @@ async function loadInbox() {
           <td>${formatDate(item.sentAt)}</td>
           <td>${item.readAt ? formatDate(item.readAt) : "-"}</td>
           <td>
-            ${item.status !== "READ"
-              ? `<button class="btn-primary small-btn" onclick="markTransferAsRead('${item.id}')">Marcar como lido</button>`
-              : "-"}
+            <div class="action-row">
+              <button class="btn-secondary small-btn" onclick="previewReceivedTransfer('${item.id}','${item.documentId}','${item.status}')">Visualizar</button>
+              ${(item.status === "SENT" || item.status === "READ")
+                ? `<button class="btn-primary small-btn" onclick="prepareTransferSignature('${item.id}','${item.documentId}')">Assinar</button>`
+                : ""}
+            </div>
           </td>
         </tr>
       `;
@@ -539,17 +621,258 @@ async function loadInbox() {
   }
 }
 
-async function markTransferAsRead(id) {
+async function previewReceivedTransfer(transferId, documentId, status) {
   try {
-    await apiRequest(`/api/transfers/${id}/read`, {
-      method: "PATCH",
-      headers: authHeaders(false)
-    });
+    if (status === "SENT") {
+      await apiRequest(`/api/transfers/${transferId}/read`, {
+        method: "PATCH",
+        headers: authHeaders(false)
+      });
+      loadInbox();
+    }
 
-    loadInbox();
+    await openEmbeddedViewer({
+      mode: "view",
+      documentId,
+      transferId,
+      containerId: "embeddedPdfContainer",
+      infoId: "viewerInfo",
+      titleId: "viewerTitle",
+      buttonId: "confirmSignBtn",
+      titleText: "Visualização do documento recebido"
+    });
   } catch (error) {
     console.error(error);
   }
+}
+
+async function prepareTransferSignature(transferId, documentId) {
+  await openEmbeddedViewer({
+    mode: "transfer",
+    documentId,
+    transferId,
+    containerId: "embeddedPdfContainer",
+    infoId: "viewerInfo",
+    titleId: "viewerTitle",
+    buttonId: "confirmSignBtn",
+    titleText: "Assinatura do documento recebido"
+  });
+}
+
+/* =========================
+   EMBEDDED PDF VIEWER / SIGN
+========================= */
+
+async function openEmbeddedViewer(config) {
+  embeddedSignState.mode = config.mode;
+  embeddedSignState.documentId = config.documentId;
+  embeddedSignState.transferId = config.transferId;
+  embeddedSignState.page = null;
+  embeddedSignState.x = null;
+  embeddedSignState.y = null;
+  embeddedSignState.targetContainerId = config.containerId;
+  embeddedSignState.targetInfoId = config.infoId;
+  embeddedSignState.targetButtonId = config.buttonId;
+
+  const container = document.getElementById(config.containerId);
+  const info = document.getElementById(config.infoId);
+  const title = document.getElementById(config.titleId);
+  const confirmBtn = document.getElementById(config.buttonId);
+
+  if (!container) {
+    throw new Error("Container do PDF não encontrado.");
+  }
+
+  container.innerHTML = "";
+  if (info) {
+    info.innerText = config.mode === "view"
+      ? "Carregando documento..."
+      : "Clique no ponto exato do documento onde a assinatura deve ser aplicada.";
+  }
+
+  if (title) {
+    title.innerText = config.titleText;
+  }
+
+  if (confirmBtn) {
+    confirmBtn.disabled = config.mode === "view";
+  }
+
+  const response = await fetch(API + `/api/documents/${config.documentId}/view`, {
+    headers: authHeaders(false)
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao carregar documento no endpoint /view.");
+  }
+
+  const blob = await response.blob();
+
+  if (!blob.type.includes("pdf")) {
+    if (info) {
+      info.innerText = "Somente documentos PDF podem ser visualizados nesta área.";
+    }
+    container.innerHTML = `<p class="muted-text">O arquivo selecionado não é um PDF.</p>`;
+    if (confirmBtn) confirmBtn.disabled = true;
+    return;
+  }
+
+  if (typeof pdfjsLib === "undefined") {
+    throw new Error("PDF.js não foi carregado.");
+  }
+
+  const pdfData = await blob.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const scale = 1.4;
+    const viewport = page.getViewport({ scale });
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "pdf-page-wrapper";
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "pdf-page-canvas";
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    const context = canvas.getContext("2d");
+
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+
+    if (config.mode !== "view") {
+      canvas.addEventListener("click", (event) => {
+        handleSignaturePlacement(event, canvas, wrapper, pageNum, scale);
+      });
+    }
+
+    wrapper.appendChild(canvas);
+    container.appendChild(wrapper);
+  }
+
+  if (info && config.mode === "view") {
+    info.innerText = "Documento carregado com sucesso.";
+  }
+}
+
+function handleSignaturePlacement(event, canvas, wrapper, pageNum, scale) {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  embeddedSignState.page = pageNum;
+  embeddedSignState.x = clickX / scale;
+  embeddedSignState.y = (canvas.height - clickY) / scale - 72;
+
+  if (embeddedSignState.previewEl) {
+    embeddedSignState.previewEl.remove();
+  }
+
+  const preview = document.createElement("div");
+  preview.className = "signature-preview";
+  preview.style.left = `${clickX}px`;
+  preview.style.top = `${clickY}px`;
+
+  const now = new Date().toLocaleString("pt-BR");
+
+  preview.innerHTML = `
+    <strong>DOCUMENTO ASSINADO</strong><br>
+    Nome: ${currentUser.name}<br>
+    Perfil: ${currentUser.role}<br>
+    Data/Hora: ${now}
+  `;
+
+  wrapper.appendChild(preview);
+  embeddedSignState.previewEl = preview;
+
+  const info = document.getElementById(embeddedSignState.targetInfoId);
+  info.innerText = `Assinatura posicionada na página ${pageNum}. Clique em "Confirmar assinatura".`;
+
+  const confirmBtn = document.getElementById(embeddedSignState.targetButtonId);
+  confirmBtn.disabled = false;
+}
+
+async function confirmEmbeddedSignature() {
+  if (!embeddedSignState.page || embeddedSignState.x === null || embeddedSignState.y === null) {
+    alert("Selecione um ponto no documento para assinar.");
+    return;
+  }
+
+  try {
+    if (embeddedSignState.mode === "own") {
+      await apiRequest(`/api/documents/${embeddedSignState.documentId}/sign-positioned`, {
+        method: "PATCH",
+        headers: authHeaders(true),
+        body: JSON.stringify({
+          page: embeddedSignState.page,
+          x: embeddedSignState.x,
+          y: embeddedSignState.y
+        })
+      });
+
+      alert("Documento assinado com sucesso.");
+    }
+
+    if (embeddedSignState.mode === "transfer") {
+      await apiRequest(`/api/transfers/${embeddedSignState.transferId}/sign`, {
+        method: "PATCH",
+        headers: authHeaders(true),
+        body: JSON.stringify({
+          page: embeddedSignState.page,
+          x: embeddedSignState.x,
+          y: embeddedSignState.y
+        })
+      });
+
+      alert("Documento assinado e devolvido ao remetente com sucesso.");
+      loadInbox();
+    }
+
+    clearEmbeddedViewer();
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao assinar documento.");
+  }
+}
+
+function clearEmbeddedViewer() {
+  embeddedSignState = {
+    mode: null,
+    documentId: null,
+    transferId: null,
+    page: null,
+    x: null,
+    y: null,
+    previewEl: null,
+    targetContainerId: null,
+    targetInfoId: null,
+    targetButtonId: null
+  };
+
+  const container = document.getElementById("embeddedPdfContainer");
+  if (container) container.innerHTML = "";
+
+  const info1 = document.getElementById("viewerInfo");
+  if (info1) info1.innerText = "Selecione um documento para visualizar.";
+
+  const info2 = document.getElementById("sendViewerInfo");
+  if (info2) info2.innerText = "Selecione um documento para visualizar ou assinar.";
+
+  const title1 = document.getElementById("viewerTitle");
+  if (title1) title1.innerText = "Visualização do documento";
+
+  const title2 = document.getElementById("sendViewerTitle");
+  if (title2) title2.innerText = "Visualização do documento";
+
+  const btn1 = document.getElementById("confirmSignBtn");
+  if (btn1) btn1.disabled = true;
+
+  const btn2 = document.getElementById("confirmOwnSignBtn");
+  if (btn2) btn2.disabled = true;
 }
 
 /* =========================
@@ -557,7 +880,7 @@ async function markTransferAsRead(id) {
 ========================= */
 
 async function initAuditPage() {
-  const ok = await bootPage(true);
+  const ok = await bootPage({ allowedRoles: ["ADMIN"] });
   if (!ok) return;
   loadAudit();
 }
@@ -570,12 +893,13 @@ async function loadAudit() {
     });
 
     const tbody = document.querySelector("#auditTable tbody");
+    if (!tbody) return;
     tbody.innerHTML = "";
 
     data.forEach(item => {
       tbody.innerHTML += `
         <tr>
-          <td>${item.action}</td>
+          <td>${item.descricao ?? item.action}</td>
           <td>${item.userId ?? "-"}</td>
           <td>${item.documentId ?? "-"}</td>
           <td>${formatDate(item.createdAt)}</td>
@@ -586,12 +910,13 @@ async function loadAudit() {
     console.error(error);
   }
 }
+
 /* =========================
-   FOLDERS / DOCUMENTS BY CATEGORY
+   FOLDERS
 ========================= */
 
 async function initFoldersPage() {
-  const ok = await bootPage(false);
+  const ok = await bootPage({ allowedRoles: ["ADMIN", "USER"] });
   if (!ok) return;
   loadFolders();
 }
@@ -604,6 +929,7 @@ async function loadFolders() {
     });
 
     const grid = document.getElementById("foldersGrid");
+    if (!grid) return;
     grid.innerHTML = "";
 
     if (!categories.length) {
@@ -658,9 +984,6 @@ async function loadDocumentsByCategory(categoryId, categoryName, categoryDescrip
           <td>
             <div class="action-row">
               <button class="btn-secondary small-btn" onclick="downloadDocument('${doc.id}')">Download</button>
-              ${currentUser && currentUser.role === "ADMIN" && doc.status !== "SIGNED"
-                ? `<button class="btn-primary small-btn" onclick="signDocument('${doc.id}')">Assinar</button>`
-                : ""}
             </div>
           </td>
         </tr>
@@ -678,127 +1001,4 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-let signDocumentId = null;
-let signSelectedPage = 1;
-let signSelectedX = null;
-let signSelectedY = null;
-let signPreviewElement = null;
-
-async function initSignPage() {
-  const ok = await bootPage(true);
-  if (!ok) return;
-
-  const params = new URLSearchParams(window.location.search);
-  signDocumentId = params.get("id");
-
-  if (!signDocumentId) {
-    alert("Documento não informado.");
-    window.location.href = "dashboard.html";
-    return;
-  }
-
-  await renderPdfForSigning(signDocumentId);
-}
-
-async function renderPdfForSigning(documentId) {
-  const response = await fetch(API + `/api/documents/${documentId}/download`, {
-    headers: authHeaders(false)
-  });
-
-  if (!response.ok) {
-    alert("Erro ao carregar PDF.");
-    return;
-  }
-
-  const blob = await response.blob();
-  const pdfData = await blob.arrayBuffer();
-
-  const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
-  const container = document.getElementById("pdfContainer");
-  container.innerHTML = "";
-
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 1.4 });
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "pdf-page-wrapper";
-
-    const canvas = document.createElement("canvas");
-    canvas.className = "pdf-page-canvas";
-    const context = canvas.getContext("2d");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({
-      canvasContext: context,
-      viewport: viewport
-    }).promise;
-
-    canvas.addEventListener("click", async (event) => {
-      if (!currentUser) {
-        await fetchCurrentUser();
-      }
-
-      const rect = canvas.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
-
-      signSelectedPage = pageNum;
-      signSelectedX = clickX;
-      signSelectedY = canvas.height - clickY - 70;
-
-      if (signPreviewElement) {
-        signPreviewElement.remove();
-      }
-
-      signPreviewElement = document.createElement("div");
-      signPreviewElement.className = "signature-preview";
-      signPreviewElement.style.left = `${clickX}px`;
-      signPreviewElement.style.top = `${clickY}px`;
-
-      const now = new Date().toLocaleString("pt-BR");
-
-      signPreviewElement.innerHTML = `
-        <strong>DOCUMENTO ASSINADO</strong><br>
-        Nome: ${currentUser.name}<br>
-        Perfil: ${currentUser.role}<br>
-        Data/Hora: ${now}
-      `;
-
-      wrapper.appendChild(signPreviewElement);
-
-      document.getElementById("signInfo").innerText =
-        `Assinatura selecionada na página ${pageNum}.`;
-    });
-
-    wrapper.appendChild(canvas);
-    container.appendChild(wrapper);
-  }
-}
-
-async function confirmSignature() {
-  if (!signDocumentId || signSelectedX === null || signSelectedY === null) {
-    alert("Selecione um local no documento para assinar.");
-    return;
-  }
-
-  try {
-    await apiRequest(`/api/documents/${signDocumentId}/sign-positioned`, {
-      method: "PATCH",
-      headers: authHeaders(true),
-      body: JSON.stringify({
-        page: signSelectedPage,
-        x: signSelectedX,
-        y: signSelectedY
-      })
-    });
-
-    alert("Documento assinado com sucesso.");
-    window.location.href = "dashboard.html";
-  } catch (error) {
-    console.error(error);
-    alert("Erro ao assinar documento.");
-  }
 }
