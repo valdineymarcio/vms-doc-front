@@ -1,82 +1,550 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Categorias</title>
-  <link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Categorias - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
 </head>
-<body class="panel-body" onload="initCategoriesPage()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initCategoriesPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html">Documentos</a>
-        <a href="upload.html">Enviar Documento</a>
-        <a class="active" href="categories.html">Categorias</a>
-        <a href="folders.html">Todos Documentos</a>
-        <a href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a href="send.html">Encaminhar</a>
-        <a href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- INÍCIO -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Início
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- DOCUMENTOS -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Documentos
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a href="upload.html">
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a href="send.html">
+                    Enviar para Usuário
+                </a>
+
+                <a href="folders.html">
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="categories.html"
+                        class="active"
+                >
+                    Categorias
+                </a>
+
+                <a href="users.html">
+                    Usuários
+                </a>
+
+                <a href="audit.html">
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <p class="sidebar-title">
+                Conta
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
     </aside>
 
+
+    <!-- =========================================
+         CONTEÚDO
+    ========================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Categorias</h1>
-          <p>Cadastro e listagem de categorias</p>
-        </div>
-      </header>
 
-      <section class="grid-2">
-        <div class="glass-card form-card" id="categoryFormCard">
-          <h3>Nova Categoria</h3>
 
-          <div class="form-group">
-            <label for="categoryName">Nome</label>
-            <input id="categoryName" placeholder="Ex.: Ofícios">
-          </div>
+        <!-- CABEÇALHO -->
 
-          <div class="form-group">
-            <label for="categoryDescription">Descrição</label>
-            <input id="categoryDescription" placeholder="Descrição da categoria">
-          </div>
+        <section class="topbar glass-card">
 
-          <button class="btn-primary full" onclick="createCategory()">Cadastrar</button>
-          <p id="categoryMsg" class="form-message"></p>
-        </div>
+            <div>
 
-        <div class="glass-card">
-          <h3>Lista de Categorias</h3>
-          <div class="table-wrapper">
-            <table class="modern-table" id="categoriesTable">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Descrição</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+                <h1>
+                    Categorias
+                </h1>
+
+                <p>
+                    Organize os documentos em grupos
+                    para facilitar a localização e consulta.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ORIENTAÇÃO -->
+
+        <section class="info-box">
+
+            <strong>
+                Para que servem as categorias?
+            </strong>
+
+            <br><br>
+
+            As categorias funcionam como uma forma de organizar
+            os documentos dentro do sistema.
+
+            <br><br>
+
+            Por exemplo: Ofícios, Contratos, ETP, Termos de Referência,
+            Relatórios ou qualquer outro tipo de documento utilizado
+            pela organização.
+
+        </section>
+
+
+        <!-- =========================================
+             CADASTRAR CATEGORIA
+        ========================================== -->
+
+        <section
+                id="categoryFormCard"
+                class="glass-card"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Nova Categoria
+                    </h2>
+
+                    <p class="section-description">
+                        Cadastre uma nova forma de organização
+                        para os documentos.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-2">
+
+                <div>
+
+                    <div class="form-group">
+
+                        <label for="categoryName">
+                            Nome da categoria
+                        </label>
+
+                        <input
+                                type="text"
+                                id="categoryName"
+                                placeholder="Ex.: Ofícios"
+                        >
+
+                        <p class="muted-text">
+                            Use um nome curto e fácil de identificar.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <div class="form-group">
+
+                        <label for="categoryDescription">
+                            Descrição
+                        </label>
+
+                        <textarea
+                                id="categoryDescription"
+                                placeholder="Ex.: Documentos oficiais enviados ou recebidos pela instituição."
+                        ></textarea>
+
+                        <p class="muted-text">
+                            Explique brevemente quais documentos
+                            devem ser associados a esta categoria.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    id="categoryMsg"
+                    class="form-message"
+            ></div>
+
+
+            <div
+                    class="action-row"
+                    style="
+                        margin-top: 24px;
+                        justify-content: flex-end;
+                    "
+            >
+
+                <button
+                        class="btn-secondary"
+                        onclick="clearCategoryForm()"
+                >
+                    Limpar
+                </button>
+
+
+                <button
+                        class="btn-primary"
+                        onclick="createCategory()"
+                >
+                    Cadastrar Categoria
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             LISTA DE CATEGORIAS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Categorias Cadastradas
+                    </h2>
+
+                    <p class="section-description">
+                        Consulte as categorias já disponíveis
+                        no sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    class="table-wrapper"
+                    id="categoriesTableWrapper"
+            >
+
+                <table
+                        class="modern-table"
+                        id="categoriesTable"
+                >
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Categoria
+                        </th>
+
+                        <th>
+                            Descrição
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <!-- preenchido pelo api.js -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div
+                    id="categoriesEmptyState"
+                    class="empty-state"
+                    style="
+                        display: none;
+                        margin-top: 20px;
+                    "
+            >
+
+                <div class="empty-state-icon">
+                    📁
+                </div>
+
+                <h3>
+                    Nenhuma categoria cadastrada
+                </h3>
+
+                <p>
+                    Cadastre uma categoria para começar
+                    a organizar os documentos do sistema.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             EXEMPLOS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Exemplos de categorias
+                    </h2>
+
+                    <p class="section-description">
+                        Algumas formas de organização
+                        que podem ser utilizadas.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-3">
+
+
+                <div class="info-box">
+
+                    <strong>
+                        Ofícios
+                    </strong>
+
+                    <br><br>
+
+                    Documentos oficiais utilizados
+                    para comunicação institucional.
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        Contratos
+                    </strong>
+
+                    <br><br>
+
+                    Contratos, termos e documentos
+                    relacionados a fornecedores ou serviços.
+
+                </div>
+
+
+                <div class="success-box">
+
+                    <strong>
+                        ETP / TR
+                    </strong>
+
+                    <br><br>
+
+                    Estudos Técnicos Preliminares
+                    e Termos de Referência.
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+</div>
+
+
+<script src="js/api.js"></script>
+
+
+<script>
+
+    function clearCategoryForm() {
+
+        const name =
+            document.getElementById(
+                "categoryName"
+            );
+
+        const description =
+            document.getElementById(
+                "categoryDescription"
+            );
+
+        const msg =
+            document.getElementById(
+                "categoryMsg"
+            );
+
+
+        if (name) {
+
+            name.value =
+                "";
+        }
+
+
+        if (description) {
+
+            description.value =
+                "";
+        }
+
+
+        if (msg) {
+
+            msg.innerText =
+                "";
+        }
+    }
+
+</script>
+
+
 </body>
+
 </html>

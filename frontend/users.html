@@ -1,97 +1,682 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Usuários</title>
-  <link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Usuários - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
 </head>
-<body class="panel-body" onload="initUsersPage()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initUsersPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html">Documentos</a>
-        <a href="upload.html">Enviar Documento</a>
-        <a href="categories.html">Categorias</a>
-        <a href="folders.html">Todos Documentos</a>
-        <a class="active" href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a href="send.html">Encaminhar</a>
-        <a href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- INÍCIO -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Início
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- DOCUMENTOS -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Documentos
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a href="upload.html">
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a href="send.html">
+                    Enviar para Usuário
+                </a>
+
+                <a href="folders.html">
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="categories.html">
+                    Categorias
+                </a>
+
+                <a
+                        href="users.html"
+                        class="active"
+                >
+                    Usuários
+                </a>
+
+                <a href="audit.html">
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <p class="sidebar-title">
+                Conta
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
     </aside>
 
+
+    <!-- =========================================
+         CONTEÚDO
+    ========================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Usuários</h1>
-          <p>Cadastro e consulta de usuários</p>
-        </div>
-      </header>
 
-      <section class="grid-2">
-        <div class="glass-card form-card">
-          <h3>Novo Usuário</h3>
 
-          <div class="form-group">
-            <label for="userName">Nome</label>
-            <input id="userName" placeholder="Nome do usuário">
-          </div>
+        <!-- CABEÇALHO -->
 
-          <div class="form-group">
-            <label for="userEmail">E-mail</label>
-            <input id="userEmail" placeholder="email@dominio.com">
-          </div>
+        <section class="topbar glass-card">
 
-          <div class="form-group">
-            <label for="userPassword">Senha</label>
-            <input id="userPassword" type="password" placeholder="Senha">
-          </div>
+            <div>
 
-          <div class="form-group">
-            <label for="userRole">Perfil</label>
-            <select id="userRole">
-              <option value="ADMIN">ADMIN</option>
-              <option value="USER">USER</option>
-            </select>
-          </div>
+                <h1>
+                    Usuários
+                </h1>
 
-          <button class="btn-primary full" onclick="createUser()">Cadastrar</button>
-          <p id="userMsg" class="form-message"></p>
-        </div>
+                <p>
+                    Cadastre e consulte as pessoas
+                    que possuem acesso ao VMS Docs.
+                </p>
 
-        <div class="glass-card">
-          <h3>Lista de Usuários</h3>
-          <div class="table-wrapper">
-            <table class="modern-table" id="usersTable">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>E-mail</th>
-                  <th>Perfil</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+            </div>
+
+        </section>
+
+
+        <!-- ORIENTAÇÃO -->
+
+        <section class="info-box">
+
+            <strong>
+                Gestão de usuários
+            </strong>
+
+            <br><br>
+
+            Apenas administradores podem acessar esta área.
+
+            <br><br>
+
+            Aqui você pode cadastrar novas contas
+            e definir o nível de acesso de cada usuário.
+
+        </section>
+
+
+        <!-- =========================================
+             TIPOS DE ACESSO
+        ========================================== -->
+
+        <section class="grid-2">
+
+            <div class="glass-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 class="section-title">
+                            Administrador
+                        </h2>
+
+                        <p class="section-description">
+                            Acesso completo ao sistema.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    O perfil
+                    <strong>ADMIN</strong>
+                    pode gerenciar documentos,
+                    categorias, usuários e consultar
+                    os registros de auditoria.
+
+                </div>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 class="section-title">
+                            Usuário
+                        </h2>
+
+                        <p class="section-description">
+                            Acesso às funções operacionais.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="success-box">
+
+                    O perfil
+                    <strong>USER</strong>
+                    pode cadastrar documentos,
+                    receber, visualizar,
+                    encaminhar e assinar arquivos.
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             NOVO USUÁRIO
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Novo Usuário
+                    </h2>
+
+                    <p class="section-description">
+                        Preencha os dados para criar
+                        uma nova conta de acesso.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-2">
+
+
+                <!-- NOME -->
+
+                <div class="form-group">
+
+                    <label for="userName">
+                        Nome completo
+                    </label>
+
+                    <input
+                            type="text"
+                            id="userName"
+                            placeholder="Ex.: João da Silva"
+                    >
+
+                    <p class="muted-text">
+                        Informe o nome que será exibido
+                        no sistema e nas assinaturas.
+                    </p>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="userEmail">
+                        E-mail
+                    </label>
+
+                    <input
+                            type="email"
+                            id="userEmail"
+                            placeholder="Ex.: joao@empresa.com"
+                    >
+
+                    <p class="muted-text">
+                        Este e-mail será utilizado
+                        para entrar no sistema.
+                    </p>
+
+                </div>
+
+
+                <!-- SENHA -->
+
+                <div class="form-group">
+
+                    <label for="userPassword">
+                        Senha inicial
+                    </label>
+
+                    <input
+                            type="password"
+                            id="userPassword"
+                            placeholder="Digite uma senha"
+                    >
+
+                    <p class="muted-text">
+                        O usuário utilizará esta senha
+                        no primeiro acesso.
+                    </p>
+
+                </div>
+
+
+                <!-- PERFIL -->
+
+                <div class="form-group">
+
+                    <label for="userRole">
+                        Perfil de acesso
+                    </label>
+
+                    <select id="userRole">
+
+                        <option value="">
+                            Selecione um perfil
+                        </option>
+
+                        <option value="USER">
+                            Usuário
+                        </option>
+
+                        <option value="ADMIN">
+                            Administrador
+                        </option>
+
+                    </select>
+
+                    <p class="muted-text">
+                        Escolha com atenção o nível
+                        de permissão da conta.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- MENSAGEM -->
+
+            <div
+                    id="userMsg"
+                    class="form-message"
+            ></div>
+
+
+            <!-- BOTÕES -->
+
+            <div
+                    class="action-row"
+                    style="
+                        margin-top: 24px;
+                        justify-content: flex-end;
+                    "
+            >
+
+                <button
+                        class="btn-secondary"
+                        onclick="clearUserForm()"
+                >
+                    Limpar
+                </button>
+
+
+                <button
+                        class="btn-primary"
+                        onclick="createUser()"
+                >
+                    Cadastrar Usuário
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             USUÁRIOS CADASTRADOS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Usuários Cadastrados
+                    </h2>
+
+                    <p class="section-description">
+                        Consulte as contas disponíveis
+                        no sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    class="table-wrapper"
+                    id="usersTableWrapper"
+            >
+
+                <table
+                        class="modern-table"
+                        id="usersTable"
+                >
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Nome
+                        </th>
+
+                        <th>
+                            E-mail
+                        </th>
+
+                        <th>
+                            Perfil
+                        </th>
+
+                        <th>
+                            Situação
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <!-- preenchido pelo api.js -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- ESTADO VAZIO -->
+
+            <div
+                    id="usersEmptyState"
+                    class="empty-state"
+                    style="
+                        display: none;
+                        margin-top: 20px;
+                    "
+            >
+
+                <div class="empty-state-icon">
+                    👤
+                </div>
+
+                <h3>
+                    Nenhum usuário encontrado
+                </h3>
+
+                <p>
+                    Cadastre uma nova conta para
+                    começar a utilizar o sistema.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             EXPLICAÇÃO
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Situação da conta
+                    </h2>
+
+                    <p class="section-description">
+                        Entenda como identificar
+                        o estado de um usuário.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-2">
+
+
+                <div class="success-box">
+
+                    <strong>
+                        Ativo
+                    </strong>
+
+                    <br><br>
+
+                    O usuário pode entrar no sistema
+                    e utilizar as funcionalidades
+                    permitidas pelo seu perfil.
+
+                </div>
+
+
+                <div class="warning-box">
+
+                    <strong>
+                        Inativo
+                    </strong>
+
+                    <br><br>
+
+                    A conta permanece cadastrada,
+                    mas não deve ser utilizada
+                    para acesso ao sistema.
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+</div>
+
+
+<script src="js/api.js"></script>
+
+
+<script>
+
+    function clearUserForm() {
+
+        const name =
+            document.getElementById(
+                "userName"
+            );
+
+        const email =
+            document.getElementById(
+                "userEmail"
+            );
+
+        const password =
+            document.getElementById(
+                "userPassword"
+            );
+
+        const role =
+            document.getElementById(
+                "userRole"
+            );
+
+        const msg =
+            document.getElementById(
+                "userMsg"
+            );
+
+
+        if (name) {
+            name.value = "";
+        }
+
+        if (email) {
+            email.value = "";
+        }
+
+        if (password) {
+            password.value = "";
+        }
+
+        if (role) {
+            role.value = "";
+        }
+
+        if (msg) {
+            msg.innerText = "";
+        }
+    }
+
+</script>
+
+
 </body>
+
 </html>

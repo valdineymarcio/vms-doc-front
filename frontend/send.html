@@ -1,84 +1,716 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Encaminhar</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Enviar Documento - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+    </script>
+
 </head>
-<body class="panel-body" onload="initSendPage()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initSendPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html">Documentos</a>
-        <a href="folders.html">Por Categoria</a>
-        <a href="upload.html">Enviar Documento</a>
-        <a href="categories.html">Categorias</a>
-        <a href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a class="active" href="send.html">Encaminhar</a>
-        <a href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- INÍCIO -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Início
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- DOCUMENTOS -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Documentos
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a href="upload.html">
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a
+                        href="send.html"
+                        class="active"
+                >
+                    Enviar para Usuário
+                </a>
+
+                <a href="folders.html">
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="categories.html">
+                    Categorias
+                </a>
+
+                <a href="users.html">
+                    Usuários
+                </a>
+
+                <a href="audit.html">
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <p class="sidebar-title">
+                Conta
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
     </aside>
 
+
+    <!-- =========================================
+         CONTEÚDO
+    ========================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Encaminhar Documento</h1>
-          <p>Visualize, assine e encaminhe o documento na mesma tela</p>
-        </div>
-      </header>
 
-      <section class="glass-card form-card">
-        <div class="form-group">
-          <label for="sendDocumentId">Documento</label>
-          <select id="sendDocumentId"></select>
-        </div>
 
-        <div class="form-group">
-          <label for="sendReceiverId">Destinatário</label>
-          <select id="sendReceiverId"></select>
-        </div>
+        <!-- CABEÇALHO -->
 
-        <div class="action-row">
-          <button class="btn-secondary" type="button" onclick="previewSelectedDocumentForSend()">Visualizar</button>
-          <button class="btn-primary" type="button" onclick="prepareOwnDocumentSignature()">Assinar</button>
-          <button class="btn-primary" type="button" onclick="sendDocumentToUser()">Encaminhar</button>
-        </div>
+        <section class="topbar glass-card">
 
-        <p id="sendMsg" class="form-message"></p>
-      </section>
+            <div>
 
-      <section class="glass-card viewer-card">
-        <div class="viewer-toolbar">
-          <div>
-            <h3 id="sendViewerTitle">Visualização do documento</h3>
-            <p id="sendViewerInfo" class="muted-text">Selecione um documento para visualizar ou assinar.</p>
-          </div>
-          <div class="action-row">
-            <button class="btn-primary" id="confirmOwnSignBtn" type="button" onclick="confirmEmbeddedSignature()" disabled>Confirmar assinatura</button>
-            <button class="btn-secondary" type="button" onclick="clearEmbeddedViewer()">Fechar visualização</button>
-          </div>
-        </div>
+                <h1>
+                    Enviar Documento
+                </h1>
 
-        <div id="embeddedPdfContainer" class="pdf-container"></div>
-      </section>
+                <p>
+                    Escolha um documento já cadastrado,
+                    confira o conteúdo e envie para outro usuário.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ORIENTAÇÃO -->
+
+        <section class="info-box">
+
+            <strong>
+                Atenção
+            </strong>
+
+            <br><br>
+
+            Esta tela não envia um novo arquivo para o sistema.
+
+            <br><br>
+
+            Aqui você seleciona um documento que já foi
+            cadastrado em
+            <strong>Novo Documento</strong>
+            e encaminha para outro usuário.
+
+        </section>
+
+
+        <!-- ETAPAS -->
+
+        <section class="steps">
+
+            <div class="step">
+
+                <div class="step-number">
+                    1
+                </div>
+
+                <div>
+
+                    <strong>
+                        Escolha o documento
+                    </strong>
+
+                    <span>
+                        Selecione um arquivo cadastrado
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    2
+                </div>
+
+                <div>
+
+                    <strong>
+                        Confira o conteúdo
+                    </strong>
+
+                    <span>
+                        Visualize o PDF
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    3
+                </div>
+
+                <div>
+
+                    <strong>
+                        Assine, se necessário
+                    </strong>
+
+                    <span>
+                        Posicione sua assinatura
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    4
+                </div>
+
+                <div>
+
+                    <strong>
+                        Escolha o destinatário
+                    </strong>
+
+                    <span>
+                        Envie para outro usuário
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             SELEÇÃO
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        1. Escolha o documento
+                    </h2>
+
+                    <p class="section-description">
+                        Selecione um documento já cadastrado
+                        no sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-2">
+
+                <div class="form-group">
+
+                    <label for="sendDocumentId">
+                        Documento
+                    </label>
+
+                    <select id="sendDocumentId">
+
+                        <option value="">
+                            Carregando documentos...
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                        class="action-row"
+                        style="
+                            align-items: flex-end;
+                            padding-bottom: 18px;
+                        "
+                >
+
+                    <button
+                            class="btn-secondary"
+                            onclick="previewSelectedDocumentForSend()"
+                    >
+                        Visualizar Documento
+                    </button>
+
+
+                    <button
+                            class="btn-primary"
+                            onclick="prepareOwnDocumentSignature()"
+                    >
+                        Assinar Documento
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             VISUALIZADOR
+        ========================================== -->
+
+        <section class="glass-card viewer-card">
+
+            <div class="viewer-toolbar">
+
+                <div>
+
+                    <h2
+                            id="sendViewerTitle"
+                            class="section-title"
+                    >
+                        2. Visualização do documento
+                    </h2>
+
+                    <p
+                            id="sendViewerInfo"
+                            class="section-description"
+                    >
+                        Selecione um documento acima para visualizar.
+                    </p>
+
+                </div>
+
+
+                <button
+                        id="confirmOwnSignBtn"
+                        class="btn-primary"
+                        onclick="confirmEmbeddedSignature()"
+                        disabled
+                >
+                    Confirmar Assinatura
+                </button>
+
+            </div>
+
+
+            <div
+                    id="embeddedPdfContainer"
+                    class="pdf-container"
+            >
+
+                <div class="empty-state">
+
+                    <div class="empty-state-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Nenhum documento aberto
+                    </h3>
+
+                    <p>
+                        Selecione um documento acima e clique em
+                        <strong>Visualizar Documento</strong>.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             DESTINATÁRIO
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        3. Escolha o destinatário
+                    </h2>
+
+                    <p class="section-description">
+                        Selecione para quem o documento será enviado.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-2">
+
+                <div class="form-group">
+
+                    <label for="sendReceiverId">
+                        Destinatário
+                    </label>
+
+                    <select id="sendReceiverId">
+
+                        <option value="">
+                            Carregando usuários...
+                        </option>
+
+                    </select>
+
+                    <p class="muted-text">
+                        O usuário receberá este documento
+                        na tela de Recebidos.
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <div class="info-box">
+
+                        <strong>
+                            Antes de enviar
+                        </strong>
+
+                        <br><br>
+
+                        Confira se o documento e o destinatário
+                        selecionados estão corretos.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    id="sendMsg"
+                    class="form-message"
+            ></div>
+
+
+            <div
+                    class="action-row"
+                    style="
+                        margin-top: 24px;
+                        justify-content: flex-end;
+                    "
+            >
+
+                <button
+                        class="btn-secondary"
+                        onclick="clearSendForm()"
+                >
+                    Limpar
+                </button>
+
+
+                <button
+                        class="btn-primary"
+                        onclick="sendDocumentToUser()"
+                >
+                    Enviar Documento
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             EXPLICAÇÃO DO FLUXO
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        O que acontece depois?
+                    </h2>
+
+                    <p class="section-description">
+                        Entenda o fluxo após o envio.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-3">
+
+
+                <div class="info-box">
+
+                    <strong>
+                        1. Documento enviado
+                    </strong>
+
+                    <br><br>
+
+                    O destinatário recebe o documento
+                    em sua caixa de entrada.
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        2. Documento visualizado
+                    </strong>
+
+                    <br><br>
+
+                    Ao abrir o documento,
+                    o sistema registra a visualização.
+
+                </div>
+
+
+                <div class="success-box">
+
+                    <strong>
+                        3. Documento assinado
+                    </strong>
+
+                    <br><br>
+
+                    Após a assinatura,
+                    o documento é registrado como concluído.
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+</div>
+
+
+<script src="js/api.js"></script>
+
+
+<script>
+
+    function clearSendForm() {
+
+        const documentSelect =
+            document.getElementById(
+                "sendDocumentId"
+            );
+
+        const receiverSelect =
+            document.getElementById(
+                "sendReceiverId"
+            );
+
+        const msg =
+            document.getElementById(
+                "sendMsg"
+            );
+
+
+        if (documentSelect) {
+
+            documentSelect.value =
+                "";
+        }
+
+
+        if (receiverSelect) {
+
+            receiverSelect.value =
+                "";
+        }
+
+
+        if (msg) {
+
+            msg.innerText =
+                "";
+        }
+
+
+        clearEmbeddedViewer();
+
+
+        const container =
+            document.getElementById(
+                "embeddedPdfContainer"
+            );
+
+
+        if (container) {
+
+            container.innerHTML = `
+
+                <div class="empty-state">
+
+                    <div class="empty-state-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Nenhum documento aberto
+                    </h3>
+
+                    <p>
+                        Selecione um documento acima e clique em
+                        <strong>Visualizar Documento</strong>.
+                    </p>
+
+                </div>
+            `;
+        }
+    }
+
+</script>
+
+
 </body>
+
 </html>

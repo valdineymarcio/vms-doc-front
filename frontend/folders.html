@@ -1,77 +1,376 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Documentos por Categoria</title>
-  <link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Pastas - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
 </head>
-<body class="panel-body" onload="initFoldersPage()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initFoldersPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html">Documentos</a>
-        <a href="folders.html" class="active">Por Categoria</a>
-        <a href="upload.html">Enviar Documento</a>
-        <a href="categories.html">Categorias</a>
-        <a href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a href="send.html">Encaminhar</a>
-        <a href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- PRINCIPAL -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Principal
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a href="upload.html">
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a href="send.html">
+                    Enviar para Usuário
+                </a>
+
+                <a
+                        href="folders.html"
+                        class="active"
+                >
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="categories.html">
+                    Categorias
+                </a>
+
+                <a href="users.html">
+                    Usuários
+                </a>
+
+                <a href="audit.html">
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
+
     </aside>
 
+
+    <!-- =================================================
+         CONTEÚDO
+    ================================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Documentos por Categoria</h1>
-          <p>Visualize os documentos organizados em pastas</p>
-        </div>
-      </header>
 
-      <section class="glass-card">
-        <h3 class="section-title">Pastas</h3>
-        <div id="foldersGrid" class="folders-grid"></div>
-      </section>
 
-      <section class="glass-card" id="folderDocumentsSection" style="display:none;">
-        <div class="section-header-inline">
-          <div>
-            <h3 id="selectedCategoryTitle">Documentos</h3>
-            <p id="selectedCategoryDescription" class="muted-text"></p>
-          </div>
-        </div>
+        <!-- TOPO -->
 
-        <div class="table-wrapper">
-          <table class="modern-table" id="categoryDocumentsTable">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Status</th>
-                <th>Arquivo</th>
-                <th>Criado em</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+        <section class="topbar glass-bar">
+
+            <div>
+
+                <h1>
+                    Pastas
+                </h1>
+
+                <p>
+                    Organize e consulte seus documentos
+                    de acordo com as categorias cadastradas.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- EXPLICAÇÃO -->
+
+        <section class="glass-card">
+
+            <div class="info-box">
+
+                <strong>
+                    Seu acervo de documentos
+                </strong>
+
+                <br><br>
+
+                As pastas representam as categorias utilizadas
+                para organizar os seus documentos.
+
+                <br><br>
+
+                Informações de envio, recebimento ou assinatura
+                entre usuários não são exibidas aqui.
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PASTAS
+        ================================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Minhas Pastas
+                    </h2>
+
+                    <p class="section-description">
+                        Clique em uma pasta para visualizar
+                        os documentos armazenados nela.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    id="foldersGrid"
+                    class="folders-grid"
+            >
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DOCUMENTOS DA PASTA
+        ================================================== -->
+
+        <section
+                id="folderDocumentsSection"
+                class="glass-card"
+                style="display: none;"
+        >
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2
+                            id="selectedCategoryTitle"
+                            class="section-title"
+                    >
+                        Pasta
+                    </h2>
+
+                    <p
+                            id="selectedCategoryDescription"
+                            class="section-description"
+                    >
+                    </p>
+
+                </div>
+
+
+                <button
+                        class="btn-secondary"
+                        onclick="closeSelectedFolder()"
+                >
+                    Fechar
+                </button>
+
+            </div>
+
+
+            <!-- ESTADO VAZIO -->
+
+            <div
+                    id="folderDocumentsEmptyState"
+                    class="empty-state"
+                    style="display: none;"
+            >
+
+                <div class="empty-state-icon">
+                    📄
+                </div>
+
+                <h3>
+                    Nenhum documento nesta pasta
+                </h3>
+
+                <p>
+                    Ainda não existem documentos
+                    vinculados a esta categoria.
+                </p>
+
+            </div>
+
+
+            <!-- TABELA -->
+
+            <div class="table-wrapper">
+
+                <table
+                        id="categoryDocumentsTable"
+                        class="modern-table"
+                >
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Documento
+                        </th>
+
+                        <th>
+                            Adicionado em
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+
+</div>
+
+
+<script src="js/api.js"></script>
+
+
+<script>
+
+    function closeSelectedFolder() {
+
+        const section =
+            document.getElementById(
+                "folderDocumentsSection"
+            );
+
+        if (section) {
+
+            section.style.display =
+                "none";
+        }
+    }
+
+</script>
+
+
 </body>
+
 </html>

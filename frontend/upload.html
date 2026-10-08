@@ -1,73 +1,720 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Enviar Documento</title>
-  <link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Novo Documento - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
 </head>
-<body class="panel-body" onload="initUploadPage()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initUploadPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html">Documentos</a>
-        <a class="active" href="upload.html">Enviar Documento</a>
-        <a href="categories.html">Categorias</a>
-        <a href="folders.html">Todos Documentos</a>
-        <a href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a href="send.html">Encaminhar</a>
-        <a href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- INÍCIO -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Início
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- DOCUMENTOS -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Documentos
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a
+                        href="upload.html"
+                        class="active"
+                >
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a href="send.html">
+                    Enviar para Usuário
+                </a>
+
+                <a href="folders.html">
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="categories.html">
+                    Categorias
+                </a>
+
+                <a href="users.html">
+                    Usuários
+                </a>
+
+                <a href="audit.html">
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <p class="sidebar-title">
+                Conta
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
     </aside>
 
+
+    <!-- =========================================
+         CONTEÚDO
+    ========================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Enviar Documento</h1>
-          <p>Cadastro e upload de arquivos</p>
-        </div>
-      </header>
 
-      <section class="glass-card form-card">
-        <div class="form-group">
-          <label for="title">Título</label>
-          <input id="title" placeholder="Ex.: Ofício 001/2026">
-        </div>
 
-        <div class="form-group">
-          <label for="description">Descrição</label>
-          <input id="description" placeholder="Descrição do documento">
-        </div>
+        <!-- CABEÇALHO -->
 
-        <div class="form-group">
-          <label for="categoryId">Categoria</label>
-          <select id="categoryId"></select>
-        </div>
+        <section class="topbar glass-card">
 
-        <div class="form-group">
-          <label for="file">Arquivo</label>
-          <input id="file" type="file">
-        </div>
+            <div>
 
-        <button class="btn-primary full" onclick="uploadDocument()">Enviar Documento</button>
-        <p id="msg" class="form-message"></p>
-      </section>
+                <h1>
+                    Novo Documento
+                </h1>
+
+                <p>
+                    Cadastre um arquivo no sistema para
+                    organizar, encaminhar ou assinar posteriormente.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ORIENTAÇÃO -->
+
+        <section class="info-box">
+
+            <strong>
+                O que acontece nesta tela?
+            </strong>
+
+            <br><br>
+
+            Aqui você apenas adiciona um documento ao VMS Docs.
+            Depois de cadastrado, ele aparecerá em
+            <strong>Meus Documentos</strong> e poderá ser
+            enviado para outro usuário ou assinado.
+
+        </section>
+
+
+        <!-- ETAPAS -->
+
+        <section class="steps">
+
+            <div class="step">
+
+                <div class="step-number">
+                    1
+                </div>
+
+                <div>
+
+                    <strong>
+                        Informe os dados
+                    </strong>
+
+                    <span>
+                        Título e descrição
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    2
+                </div>
+
+                <div>
+
+                    <strong>
+                        Escolha a categoria
+                    </strong>
+
+                    <span>
+                        Organize o documento
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    3
+                </div>
+
+                <div>
+
+                    <strong>
+                        Selecione o arquivo
+                    </strong>
+
+                    <span>
+                        Escolha no computador
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    4
+                </div>
+
+                <div>
+
+                    <strong>
+                        Salve no sistema
+                    </strong>
+
+                    <span>
+                        Finalize o cadastro
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FORMULÁRIO -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Dados do Documento
+                    </h2>
+
+                    <p class="section-description">
+                        Preencha as informações abaixo
+                        para cadastrar o arquivo.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-2">
+
+
+                <!-- COLUNA ESQUERDA -->
+
+                <div>
+
+
+                    <div class="form-group">
+
+                        <label for="title">
+                            Título do documento
+                        </label>
+
+                        <input
+                                type="text"
+                                id="title"
+                                placeholder="Ex.: Ofício nº 025/2026"
+                        >
+
+                        <p class="muted-text">
+                            Use um título fácil de identificar.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="description">
+                            Descrição
+                        </label>
+
+                        <textarea
+                                id="description"
+                                placeholder="Descreva brevemente o conteúdo ou finalidade do documento."
+                        ></textarea>
+
+                        <p class="muted-text">
+                            Campo opcional, mas ajuda na organização.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- COLUNA DIREITA -->
+
+                <div>
+
+
+                    <div class="form-group">
+
+                        <label for="categoryId">
+                            Categoria
+                        </label>
+
+                        <select id="categoryId">
+
+                            <option value="">
+                                Carregando categorias...
+                            </option>
+
+                        </select>
+
+                        <p class="muted-text">
+                            A categoria define em qual pasta
+                            o documento será organizado.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="file">
+                            Arquivo
+                        </label>
+
+                        <input
+                                type="file"
+                                id="file"
+                        >
+
+                        <p class="muted-text">
+                            Selecione o arquivo que deseja
+                            armazenar no sistema.
+                        </p>
+
+                    </div>
+
+
+                    <!-- ARQUIVO SELECIONADO -->
+
+                    <div
+                            id="selectedFileInfo"
+                            class="info-box"
+                            style="display: none;"
+                    >
+
+                        <strong>
+                            Arquivo selecionado
+                        </strong>
+
+                        <br><br>
+
+                        <span id="selectedFileName">
+                            -
+                        </span>
+
+                        <br>
+
+                        <span
+                                id="selectedFileSize"
+                                class="muted-text"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MENSAGEM -->
+
+            <div
+                    id="msg"
+                    class="form-message"
+            ></div>
+
+
+            <!-- BOTÕES -->
+
+            <div
+                    class="action-row"
+                    style="
+                        margin-top: 24px;
+                        justify-content: flex-end;
+                    "
+            >
+
+                <button
+                        class="btn-secondary"
+                        onclick="clearUploadForm()"
+                >
+                    Limpar
+                </button>
+
+
+                <button
+                        id="uploadButton"
+                        class="btn-primary"
+                        onclick="uploadDocument()"
+                >
+                    Salvar Documento
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- PRÓXIMO PASSO -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Depois de cadastrar
+                    </h2>
+
+                    <p class="section-description">
+                        O documento ficará disponível para
+                        outras ações dentro do sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+
+                <a
+                        href="dashboard.html"
+                        class="quick-action"
+                >
+
+                    <div class="quick-action-icon">
+                        📄
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Meus Documentos
+                        </strong>
+
+                        <span>
+                            Consulte os arquivos cadastrados
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                        href="send.html"
+                        class="quick-action"
+                >
+
+                    <div class="quick-action-icon">
+                        →
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Enviar para Usuário
+                        </strong>
+
+                        <span>
+                            Encaminhe o documento para outra pessoa
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                        href="folders.html"
+                        class="quick-action"
+                >
+
+                    <div class="quick-action-icon">
+                        📁
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Pastas
+                        </strong>
+
+                        <span>
+                            Consulte documentos por categoria
+                        </span>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+</div>
+
+
+<script src="js/api.js"></script>
+
+
+<script>
+
+    /*
+     * Mostra informações do arquivo
+     * assim que o usuário selecionar.
+     */
+
+    document
+        .getElementById("file")
+        .addEventListener(
+            "change",
+            function () {
+
+                const file =
+                    this.files[0];
+
+                const info =
+                    document.getElementById(
+                        "selectedFileInfo"
+                    );
+
+                const name =
+                    document.getElementById(
+                        "selectedFileName"
+                    );
+
+                const size =
+                    document.getElementById(
+                        "selectedFileSize"
+                    );
+
+
+                if (!file) {
+
+                    info.style.display =
+                        "none";
+
+                    return;
+                }
+
+
+                name.innerText =
+                    file.name;
+
+
+                const sizeKB =
+                    file.size / 1024;
+
+
+                if (sizeKB < 1024) {
+
+                    size.innerText =
+                        `${sizeKB.toFixed(1)} KB`;
+
+                } else {
+
+                    const sizeMB =
+                        sizeKB / 1024;
+
+                    size.innerText =
+                        `${sizeMB.toFixed(2)} MB`;
+                }
+
+
+                info.style.display =
+                    "block";
+            }
+        );
+
+
+    /*
+     * Limpa o formulário.
+     */
+
+    function clearUploadForm() {
+
+        document
+            .getElementById("title")
+            .value =
+            "";
+
+        document
+            .getElementById("description")
+            .value =
+            "";
+
+        document
+            .getElementById("categoryId")
+            .value =
+            "";
+
+        document
+            .getElementById("file")
+            .value =
+            "";
+
+        document
+            .getElementById("msg")
+            .innerText =
+            "";
+
+        document
+            .getElementById(
+                "selectedFileInfo"
+            )
+            .style
+            .display =
+            "none";
+    }
+
+</script>
+
+
 </body>
+
 </html>

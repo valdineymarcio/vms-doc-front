@@ -1,64 +1,530 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Auditoria</title>
-  <link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Auditoria - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
 </head>
-<body class="panel-body" onload="initAuditPage()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initAuditPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html">Documentos</a>
-        <a href="upload.html">Enviar Documento</a>
-        <a href="categories.html">Categorias</a>
-        <a href="folders.html">Todos Documentos</a>
-        <a href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a href="send.html">Encaminhar</a>
-        <a class="active" href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- INÍCIO -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Início
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- DOCUMENTOS -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Documentos
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a href="upload.html">
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a href="send.html">
+                    Enviar para Usuário
+                </a>
+
+                <a href="folders.html">
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="categories.html">
+                    Categorias
+                </a>
+
+                <a href="users.html">
+                    Usuários
+                </a>
+
+                <a
+                        href="audit.html"
+                        class="active"
+                >
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <p class="sidebar-title">
+                Conta
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
     </aside>
 
+
+    <!-- =========================================
+         CONTEÚDO
+    ========================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Auditoria</h1>
-          <p>Histórico de movimentações do sistema</p>
-        </div>
-      </header>
 
-      <section class="glass-card">
-        <div class="table-wrapper">
-          <table class="modern-table" id="auditTable">
-            <thead>
-              <tr>
-                <th>Ação</th>
-                <th>Usuário</th>
-                <th>Documento</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+
+        <!-- CABEÇALHO -->
+
+        <section class="topbar glass-card">
+
+            <div>
+
+                <h1>
+                    Auditoria
+                </h1>
+
+                <p>
+                    Consulte o histórico de ações realizadas
+                    dentro do VMS Docs.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ORIENTAÇÃO -->
+
+        <section class="info-box">
+
+            <strong>
+                O que é a auditoria?
+            </strong>
+
+            <br><br>
+
+            A auditoria registra ações importantes realizadas
+            dentro do sistema.
+
+            <br><br>
+
+            Esses registros ajudam a identificar
+            quem realizou uma ação,
+            qual documento foi envolvido
+            e quando a operação aconteceu.
+
+        </section>
+
+
+        <!-- =========================================
+             EXPLICAÇÃO DOS REGISTROS
+        ========================================== -->
+
+        <section class="grid-3">
+
+
+            <div class="glass-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 class="section-title">
+                            Ação
+                        </h2>
+
+                        <p class="section-description">
+                            O que aconteceu.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    Exemplos:
+
+                    <br><br>
+
+                    Documento enviado,
+                    documento visualizado,
+                    assinatura realizada
+                    ou documento devolvido.
+
+                </div>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 class="section-title">
+                            Usuário
+                        </h2>
+
+                        <p class="section-description">
+                            Quem realizou a ação.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    O sistema registra o identificador
+                    do usuário responsável pela operação.
+
+                </div>
+
+            </div>
+
+
+            <div class="glass-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2 class="section-title">
+                            Documento
+                        </h2>
+
+                        <p class="section-description">
+                            Qual arquivo foi afetado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="success-box">
+
+                    Quando a ação envolve um documento,
+                    o sistema registra seu identificador.
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =========================================
+             REGISTROS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Histórico de Atividades
+                    </h2>
+
+                    <p class="section-description">
+                        Registros de ações realizadas
+                        no sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                    class="table-wrapper"
+                    id="auditTableWrapper"
+            >
+
+                <table
+                        class="modern-table"
+                        id="auditTable"
+                >
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Ação
+                        </th>
+
+                        <th>
+                            Usuário
+                        </th>
+
+                        <th>
+                            Documento
+                        </th>
+
+                        <th>
+                            Data e hora
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <!-- preenchido pelo api.js -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- ESTADO VAZIO -->
+
+            <div
+                    id="auditEmptyState"
+                    class="empty-state"
+                    style="
+                        display: none;
+                        margin-top: 20px;
+                    "
+            >
+
+                <div class="empty-state-icon">
+                    🕘
+                </div>
+
+                <h3>
+                    Nenhum registro de auditoria
+                </h3>
+
+                <p>
+                    Quando ações forem realizadas no sistema,
+                    elas aparecerão nesta área.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             TIPOS DE EVENTOS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Exemplos de eventos registrados
+                    </h2>
+
+                    <p class="section-description">
+                        Algumas ações que podem aparecer
+                        no histórico.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid-3">
+
+
+                <div class="info-box">
+
+                    <strong>
+                        Documento enviado
+                    </strong>
+
+                    <br><br>
+
+                    Um usuário encaminhou
+                    um documento para outra pessoa.
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        Documento visualizado
+                    </strong>
+
+                    <br><br>
+
+                    O destinatário abriu
+                    um documento recebido.
+
+                </div>
+
+
+                <div class="success-box">
+
+                    <strong>
+                        Documento assinado
+                    </strong>
+
+                    <br><br>
+
+                    Uma assinatura foi aplicada
+                    ao documento.
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             OBSERVAÇÃO
+        ========================================== -->
+
+        <section class="warning-box">
+
+            <strong>
+                Importante
+            </strong>
+
+            <br><br>
+
+            Os registros de auditoria servem para
+            rastrear as principais operações do sistema.
+
+            Evite alterar ou excluir esses registros
+            sem necessidade administrativa.
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+</div>
+
+
+<script src="js/api.js"></script>
+
+
 </body>
+
 </html>

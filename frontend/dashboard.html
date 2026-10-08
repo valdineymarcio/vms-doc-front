@@ -1,71 +1,576 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>VMS Docs - Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Dashboard - VMS Docs
+    </title>
+
+    <link
+            rel="stylesheet"
+            href="css/style.css"
+    >
+
 </head>
-<body class="panel-body" onload="initDashboard()">
-  <div class="bg-grid"></div>
 
-  <div class="layout">
+
+<body onload="initDashboardPage()">
+
+<div class="bg-grid"></div>
+
+
+<div class="layout">
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
     <aside class="sidebar glass-card">
-      <div class="sidebar-brand">
-        <div class="brand-badge small">VMS</div>
-        <div>
-          <h2>VMS Docs</h2>
-          <p>Gestão documental</p>
+
+        <div class="sidebar-brand">
+
+            <div class="brand-badge small">
+                VMS
+            </div>
+
+            <div>
+
+                <h2>
+                    VMS Docs
+                </h2>
+
+                <p>
+                    Gestão de documentos
+                </p>
+
+            </div>
+
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a class="active" href="dashboard.html">Documentos</a>
-        <a href="upload.html">Enviar Documento</a>
-        <a href="categories.html">Categorias</a>
-        <a href="folders.html">Todos Documentos</a>
-        <a href="users.html">Usuários</a>
-        <a href="inbox.html">Recebidos</a>
-        <a href="send.html">Encaminhar</a>
-        <a href="audit.html">Auditoria</a>
-      </nav>
 
-      <button class="btn-danger full" onclick="logout()">Sair</button>
+        <!-- INÍCIO -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Início
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="dashboard.html"
+                        class="active"
+                >
+                    Dashboard
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- DOCUMENTOS -->
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Documentos
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="dashboard.html">
+                    Meus Documentos
+                </a>
+
+                <a href="upload.html">
+                    Novo Documento
+                </a>
+
+                <a href="inbox.html">
+                    Recebidos
+                </a>
+
+                <a href="send.html">
+                    Enviar para Usuário
+                </a>
+
+                <a href="folders.html">
+                    Pastas
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <div
+                class="sidebar-section"
+                data-admin-only
+        >
+
+            <p class="sidebar-title">
+                Administração
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a href="categories.html">
+                    Categorias
+                </a>
+
+                <a href="users.html">
+                    Usuários
+                </a>
+
+                <a href="audit.html">
+                    Auditoria
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- CONTA -->
+
+        <div
+                class="sidebar-section"
+                style="margin-top: auto;"
+        >
+
+            <p class="sidebar-title">
+                Conta
+            </p>
+
+            <nav class="sidebar-nav">
+
+                <a
+                        href="#"
+                        onclick="logout(); return false;"
+                >
+                    Sair
+                </a>
+
+            </nav>
+
+        </div>
+
     </aside>
 
+
+    <!-- =========================================
+         CONTEÚDO
+    ========================================== -->
+
     <main class="content">
-      <header class="topbar glass-bar">
-        <div>
-          <h1>Documentos</h1>
-          <p>Consulta, busca, download e assinatura</p>
-        </div>
-      </header>
 
-      <section class="glass-card">
-        <div class="toolbar">
-          <input id="search" placeholder="Buscar por título...">
-          <button class="btn-primary" onclick="searchDocuments()">Buscar</button>
-          <button class="btn-secondary" onclick="loadDocuments()">Limpar</button>
-        </div>
 
-        <div class="table-wrapper">
-          <table class="modern-table" id="documentsTable">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Status</th>
-                <th>Arquivo</th>
-                <th>Criado em</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+        <!-- TOPO -->
+
+        <section class="topbar glass-card">
+
+            <div>
+
+                <h1 id="welcomeTitle">
+                    Olá!
+                </h1>
+
+                <p>
+                    Acompanhe seus documentos,
+                    recebimentos e assinaturas
+                    em um único lugar.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <a
+                        href="upload.html"
+                        class="btn-primary"
+                        style="
+                            display: inline-block;
+                            text-decoration: none;
+                            padding: 12px 18px;
+                            border-radius: 14px;
+                        "
+                >
+                    + Novo Documento
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             CARDS DO DASHBOARD
+        ========================================== -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Total de documentos
+                </span>
+
+                <strong
+                        class="stat-value"
+                        id="totalDocuments"
+                >
+                    0
+                </strong>
+
+                <span class="stat-help">
+                    Documentos cadastrados
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Assinados
+                </span>
+
+                <strong
+                        class="stat-value"
+                        id="signedDocuments"
+                >
+                    0
+                </strong>
+
+                <span class="stat-help">
+                    Documentos finalizados
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Pendentes
+                </span>
+
+                <strong
+                        class="stat-value"
+                        id="pendingDocuments"
+                >
+                    0
+                </strong>
+
+                <span class="stat-help">
+                    Aguardando assinatura
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    Recebidos
+                </span>
+
+                <strong
+                        class="stat-value"
+                        id="receivedDocuments"
+                >
+                    0
+                </strong>
+
+                <span class="stat-help">
+                    Documentos enviados para você
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             AÇÕES RÁPIDAS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Ações rápidas
+                    </h2>
+
+                    <p class="section-description">
+                        Acesse as principais
+                        funções do sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+
+                <a
+                        href="upload.html"
+                        class="quick-action"
+                >
+
+                    <div class="quick-action-icon">
+                        +
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Novo Documento
+                        </strong>
+
+                        <span>
+                            Envie um novo arquivo
+                            para o sistema
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                        href="inbox.html"
+                        class="quick-action"
+                >
+
+                    <div class="quick-action-icon">
+                        ↓
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Documentos Recebidos
+                        </strong>
+
+                        <span>
+                            Veja documentos enviados
+                            para você
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                        href="send.html"
+                        class="quick-action"
+                >
+
+                    <div class="quick-action-icon">
+                        →
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Enviar Documento
+                        </strong>
+
+                        <span>
+                            Encaminhe um documento
+                            para outro usuário
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             DOCUMENTOS
+        ========================================== -->
+
+        <section class="glass-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Meus Documentos
+                    </h2>
+
+                    <p class="section-description">
+                        Consulte os documentos
+                        cadastrados no sistema.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUSCA -->
+
+            <div class="toolbar">
+
+                <input
+                        type="text"
+                        id="search"
+                        placeholder="Digite o título do documento..."
+                >
+
+                <button
+                        class="btn-primary"
+                        onclick="searchDashboardDocuments()"
+                >
+                    Buscar
+                </button>
+
+
+                <button
+                        class="btn-secondary"
+                        onclick="clearDocumentSearch()"
+                >
+                    Limpar
+                </button>
+
+            </div>
+
+
+            <!-- TABELA -->
+
+            <div
+                    class="table-wrapper"
+                    id="documentsTableWrapper"
+            >
+
+                <table
+                        class="modern-table"
+                        id="documentsTable"
+                >
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Documento
+                        </th>
+
+                        <th>
+                            Situação
+                        </th>
+
+                        <th>
+                            Arquivo
+                        </th>
+
+                        <th>
+                            Data
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <!-- preenchido pelo api.js -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- ESTADO VAZIO -->
+
+            <div
+                    class="empty-state"
+                    id="documentsEmptyState"
+                    style="display: none;"
+            >
+
+                <div class="empty-state-icon">
+                    📄
+                </div>
+
+                <h3>
+                    Nenhum documento encontrado
+                </h3>
+
+                <p>
+                    Quando você cadastrar
+                    um documento,
+                    ele aparecerá nesta área.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================
+             ORIENTAÇÃO
+        ========================================== -->
+
+        <section class="info-box">
+
+            <strong>
+                Como funciona?
+            </strong>
+
+            <br><br>
+
+            Você pode cadastrar documentos,
+            organizá-los em pastas,
+            encaminhá-los para outros usuários
+            e realizar assinaturas eletrônicas
+            diretamente pelo sistema.
+
+        </section>
+
+
     </main>
-  </div>
 
-  <script src="js/api.js"></script>
+</div>
+
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+
 </body>
+
 </html>

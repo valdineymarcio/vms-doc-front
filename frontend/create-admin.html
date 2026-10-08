@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Criar Administrador - VMS Docs
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #08111f;
+
+            font-family: Arial, sans-serif;
+
+            color: white;
+        }
+
+        .container {
+
+            width: 420px;
+
+            padding: 35px;
+
+            background: #111b2c;
+
+            border: 1px solid #263449;
+
+            border-radius: 16px;
+        }
+
+        h1 {
+
+            text-align: center;
+
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #94a3b8;
+
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+
+            margin-bottom: 18px;
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #d6deeb;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: 1px solid #334155;
+
+            border-radius: 8px;
+
+            background: #1a2435;
+
+            color: white;
+
+            outline: none;
+        }
+
+        input:focus {
+
+            border-color: #3b82f6;
+        }
+
+        button {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+
+            opacity: 0.6;
+
+            cursor: not-allowed;
+        }
+
+        #msg {
+
+            margin-top: 20px;
+
+            text-align: center;
+
+            min-height: 20px;
+        }
+
+        .success {
+
+            color: #22c55e;
+        }
+
+        .error {
+
+            color: #ef4444;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <h1>
+        VMS Docs
+    </h1>
+
+    <div class="subtitle">
+        Cadastro do administrador inicial
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="name">
+            Nome
+        </label>
+
+        <input
+                id="name"
+                type="text"
+                placeholder="Nome do administrador"
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="email">
+            E-mail
+        </label>
+
+        <input
+                id="email"
+                type="email"
+                placeholder="admin@vmsdocs.com"
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="password">
+            Senha
+        </label>
+
+        <input
+                id="password"
+                type="password"
+                placeholder="Digite a senha"
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label for="confirmPassword">
+            Confirmar senha
+        </label>
+
+        <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Digite a senha novamente"
+        >
+
+    </div>
+
+
+    <button
+            id="btnCreate"
+            onclick="createAdmin()"
+    >
+        Criar Administrador
+    </button>
+
+
+    <div id="msg"></div>
+
+</div>
+
+
+<script>
+
+    const API =
+        "http://localhost:8080";
+
+
+    async function createAdmin() {
+
+        const name =
+            document
+                .getElementById("name")
+                .value
+                .trim();
+
+
+        const email =
+            document
+                .getElementById("email")
+                .value
+                .trim();
+
+
+        const password =
+            document
+                .getElementById("password")
+                .value;
+
+
+        const confirmPassword =
+            document
+                .getElementById("confirmPassword")
+                .value;
+
+
+        const msg =
+            document.getElementById("msg");
+
+
+        const button =
+            document.getElementById("btnCreate");
+
+
+        msg.innerText = "";
+
+        msg.className = "";
+
+
+        if (
+            !name ||
+            !email ||
+            !password ||
+            !confirmPassword
+        ) {
+
+            msg.innerText =
+                "Preencha todos os campos.";
+
+            msg.className =
+                "error";
+
+            return;
+        }
+
+
+        if (
+            password.length < 6
+        ) {
+
+            msg.innerText =
+                "A senha deve ter pelo menos 6 caracteres.";
+
+            msg.className =
+                "error";
+
+            return;
+        }
+
+
+        if (
+            password !== confirmPassword
+        ) {
+
+            msg.innerText =
+                "As senhas não são iguais.";
+
+            msg.className =
+                "error";
+
+            return;
+        }
+
+
+        button.disabled = true;
+
+        button.innerText =
+            "Criando administrador...";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    API + "/api/auth/setup-admin",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body: JSON.stringify({
+
+                            name: name,
+
+                            email: email,
+
+                            password: password
+
+                        })
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                let message =
+                    "Erro ao criar administrador.";
+
+
+                try {
+
+                    const data =
+                        await response.json();
+
+
+                    if (data.detail) {
+
+                        message =
+                            data.detail;
+
+                    } else if (data.message) {
+
+                        message =
+                            data.message;
+                    }
+
+                } catch (e) {
+
+                    const text =
+                        await response.text();
+
+                    if (text) {
+
+                        message = text;
+                    }
+                }
+
+
+                throw new Error(message);
+            }
+
+
+            msg.innerText =
+                "Administrador criado com sucesso!";
+
+            msg.className =
+                "success";
+
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "index.html";
+
+            }, 1500);
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            msg.innerText =
+                error.message;
+
+            msg.className =
+                "error";
+
+        } finally {
+
+            button.disabled =
+                false;
+
+            button.innerText =
+                "Criar Administrador";
+        }
+    }
+
+</script>
+
+</body>
+
+</html>
