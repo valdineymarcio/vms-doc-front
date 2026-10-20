@@ -1,14 +1,12 @@
 const API =
     "http://localhost:8080";
 
-
 /* =====================================================
    TEMA
 ===================================================== */
 
 const THEME_STORAGE_KEY =
     "vmsdocs-theme";
-
 
 function applySavedTheme() {
 
@@ -17,12 +15,10 @@ function applySavedTheme() {
             THEME_STORAGE_KEY
         );
 
-
     const theme =
         savedTheme === "light"
             ? "light"
             : "dark";
-
 
     document
         .documentElement
@@ -31,7 +27,6 @@ function applySavedTheme() {
             theme
         );
 }
-
 
 function getCurrentTheme() {
 
@@ -44,7 +39,6 @@ function getCurrentTheme() {
         : "dark";
 }
 
-
 function setTheme(
     theme
 ) {
@@ -54,7 +48,6 @@ function setTheme(
             ? "light"
             : "dark";
 
-
     document
         .documentElement
         .setAttribute(
@@ -62,16 +55,13 @@ function setTheme(
             selectedTheme
         );
 
-
     localStorage.setItem(
         THEME_STORAGE_KEY,
         selectedTheme
     );
 
-
     updateThemeSwitcherState();
 }
-
 
 function updateThemeSwitcherState() {
 
@@ -80,48 +70,38 @@ function updateThemeSwitcherState() {
             "themeToggle"
         );
 
-
     const lightLabel =
         document.getElementById(
             "themeLabelLight"
         );
-
 
     const darkLabel =
         document.getElementById(
             "themeLabelDark"
         );
 
-
     const theme =
         getCurrentTheme();
 
-
     if (toggle) {
-
         toggle.checked =
             theme === "dark";
     }
 
-
     if (lightLabel) {
-
         lightLabel.classList.toggle(
             "active",
             theme === "light"
         );
     }
 
-
     if (darkLabel) {
-
         darkLabel.classList.toggle(
             "active",
             theme === "dark"
         );
     }
 }
-
 
 function createThemeSelector() {
 
@@ -130,32 +110,25 @@ function createThemeSelector() {
             "themeSwitcher"
         )
     ) {
-
         return;
     }
-
 
     const sidebar =
         document.querySelector(
             ".sidebar"
         );
 
-
     if (!sidebar) {
-
         return;
     }
-
 
     const sections =
         sidebar.querySelectorAll(
             ".sidebar-section"
         );
 
-
     let accountSection =
         null;
-
 
     sections.forEach(
         section => {
@@ -171,16 +144,13 @@ function createThemeSelector() {
         }
     );
 
-
     const themeSection =
         document.createElement(
             "div"
         );
 
-
     themeSection.className =
         "sidebar-section sidebar-theme-section";
-
 
     themeSection.innerHTML = `
 
@@ -231,7 +201,6 @@ function createThemeSelector() {
 
     `;
 
-
     if (accountSection) {
 
         sidebar.insertBefore(
@@ -246,12 +215,10 @@ function createThemeSelector() {
         );
     }
 
-
     const toggle =
         document.getElementById(
             "themeToggle"
         );
-
 
     if (toggle) {
 
@@ -277,13 +244,10 @@ function createThemeSelector() {
         );
     }
 
-
     updateThemeSwitcherState();
 }
 
-
 applySavedTheme();
-
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -301,7 +265,6 @@ document.addEventListener(
 let currentUser =
     null;
 
-
 let embeddedSignState = {
     mode: null,
     documentId: null,
@@ -315,6 +278,17 @@ let embeddedSignState = {
     targetButtonId: null
 };
 
+/* =====================================================
+   ASSINATURA PENDENTE DO REMETENTE
+
+   Na tela de envio, a assinatura NÃO altera o documento
+   original. Aqui guardamos somente a posição escolhida.
+   Depois que a transferência é criada, essa posição é
+   aplicada à CÓPIA da transferência pelo endpoint
+   /api/transfers/{id}/sign-sender.
+===================================================== */
+
+let pendingSenderSignature = null;
 
 if (
     typeof pdfjsLib !==
@@ -339,7 +313,6 @@ function getToken() {
     );
 }
 
-
 function authHeaders(
     json = true
 ) {
@@ -347,17 +320,14 @@ function authHeaders(
     const headers =
         {};
 
-
     const token =
         getToken();
-
 
     if (token) {
 
         headers.Authorization =
             "Bearer " + token;
     }
-
 
     if (json) {
 
@@ -366,7 +336,6 @@ function authHeaders(
         ] =
             "application/json";
     }
-
 
     return headers;
 }
@@ -387,7 +356,6 @@ async function readErrorMessage(
                 "Content-Type"
             ) || "";
 
-
         if (
             type.includes(
                 "application/json"
@@ -399,26 +367,21 @@ async function readErrorMessage(
                     .clone()
                     .json();
 
-
             if (data.message) {
                 return data.message;
             }
 
-
             if (data.detail) {
                 return data.detail;
             }
-
 
             if (data.error) {
                 return data.error;
             }
         }
 
-
         const text =
             await response.text();
-
 
         if (
             text &&
@@ -428,14 +391,12 @@ async function readErrorMessage(
             return text.trim();
         }
 
-
     } catch (error) {
 
         console.error(
             error
         );
     }
-
 
     return (
         "Erro HTTP "
@@ -444,14 +405,12 @@ async function readErrorMessage(
     );
 }
 
-
 async function apiRequest(
     path,
     options = {}
 ) {
 
     let response;
-
 
     try {
 
@@ -461,14 +420,12 @@ async function apiRequest(
                 options
             );
 
-
     } catch (error) {
 
         throw new Error(
             "Não foi possível conectar ao servidor."
         );
     }
-
 
     if (
         !response.ok
@@ -479,7 +436,6 @@ async function apiRequest(
                 response
             );
 
-
         if (
             response.status === 401
         ) {
@@ -488,25 +444,21 @@ async function apiRequest(
                 path ===
                 "/api/auth/login";
 
-
             if (!loginRequest) {
 
                 localStorage.removeItem(
                     "token"
                 );
 
-
                 window.location.href =
                     "index.html";
             }
-
 
             throw new Error(
                 message ||
                 "E-mail ou senha inválidos."
             );
         }
-
 
         if (
             response.status === 403
@@ -518,12 +470,10 @@ async function apiRequest(
             );
         }
 
-
         throw new Error(
             message
         );
     }
-
 
     if (
         response.status === 204
@@ -532,12 +482,10 @@ async function apiRequest(
         return null;
     }
 
-
     const type =
         response.headers.get(
             "Content-Type"
         ) || "";
-
 
     if (
         type.includes(
@@ -547,7 +495,6 @@ async function apiRequest(
 
         return response.json();
     }
-
 
     return response;
 }
@@ -573,18 +520,14 @@ async function fetchCurrentUser() {
             }
         );
 
-
     return currentUser;
 }
-
 
 function getCurrentRole() {
 
     if (!currentUser) {
-
         return "";
     }
-
 
     let role =
         String(
@@ -593,7 +536,6 @@ function getCurrentRole() {
         )
             .trim()
             .toUpperCase();
-
 
     if (
         role.startsWith(
@@ -606,7 +548,6 @@ function getCurrentRole() {
                 5
             );
     }
-
 
     return role;
 }
@@ -621,10 +562,8 @@ function applyRoleVisibility() {
     const role =
         getCurrentRole();
 
-
     const isAdmin =
         role === "ADMIN";
-
 
     document
         .querySelectorAll(
@@ -641,13 +580,11 @@ function applyRoleVisibility() {
                             "admin-visible"
                         );
 
-
                     element.style.setProperty(
                         "display",
                         "block",
                         "important"
                     );
-
 
                 } else {
 
@@ -656,7 +593,6 @@ function applyRoleVisibility() {
                         .remove(
                             "admin-visible"
                         );
-
 
                     element.style.setProperty(
                         "display",
@@ -683,7 +619,6 @@ async function bootPage(
     } =
         options;
 
-
     if (!getToken()) {
 
         window.location.href =
@@ -692,15 +627,12 @@ async function bootPage(
         return false;
     }
 
-
     try {
 
         await fetchCurrentUser();
 
-
         const role =
             getCurrentRole();
-
 
         if (
             adminOnly &&
@@ -712,7 +644,6 @@ async function bootPage(
 
             return false;
         }
-
 
         if (
             allowedRoles.length >
@@ -730,7 +661,6 @@ async function bootPage(
                             .toUpperCase()
                 );
 
-
             if (
                 !normalized.includes(
                     role
@@ -744,12 +674,9 @@ async function bootPage(
             }
         }
 
-
         applyRoleVisibility();
 
-
         return true;
-
 
     } catch (error) {
 
@@ -757,15 +684,12 @@ async function bootPage(
             error
         );
 
-
         localStorage.removeItem(
             "token"
         );
 
-
         window.location.href =
             "index.html";
-
 
         return false;
     }
@@ -787,7 +711,6 @@ async function login() {
             .trim()
             .toLowerCase();
 
-
     const password =
         document
             .getElementById(
@@ -795,12 +718,10 @@ async function login() {
             )
             ?.value;
 
-
     const msg =
         document.getElementById(
             "msg"
         );
-
 
     if (
         !email ||
@@ -815,7 +736,6 @@ async function login() {
 
         return;
     }
-
 
     try {
 
@@ -839,16 +759,13 @@ async function login() {
                 }
             );
 
-
         localStorage.setItem(
             "token",
             data.token
         );
 
-
         window.location.href =
             "dashboard.html";
-
 
     } catch (error) {
 
@@ -860,13 +777,11 @@ async function login() {
     }
 }
 
-
 function logout() {
 
     localStorage.removeItem(
         "token"
     );
-
 
     window.location.href =
         "index.html";
@@ -892,7 +807,6 @@ function renderStatus(
         `;
     }
 
-
     if (
         status === "READ"
     ) {
@@ -903,7 +817,6 @@ function renderStatus(
             </span>
         `;
     }
-
 
     if (
         status === "SENT"
@@ -916,7 +829,6 @@ function renderStatus(
         `;
     }
 
-
     if (
         status === "RETURNED"
     ) {
@@ -928,7 +840,6 @@ function renderStatus(
         `;
     }
 
-
     return `
         <span class="status-badge status-pending">
             Pendente
@@ -936,16 +847,13 @@ function renderStatus(
     `;
 }
 
-
 function formatDate(
     value
 ) {
 
     if (!value) {
-
         return "-";
     }
-
 
     return new Date(
         value
@@ -970,17 +878,14 @@ async function initUploadPage() {
             ]
         });
 
-
     if (!ok) {
         return;
     }
-
 
     await loadCategoriesSelect(
         "categoryId"
     );
 }
-
 
 async function uploadDocument() {
 
@@ -989,30 +894,25 @@ async function uploadDocument() {
             "title"
         )?.value.trim();
 
-
     const description =
         document.getElementById(
             "description"
         )?.value.trim();
-
 
     const categoryId =
         document.getElementById(
             "categoryId"
         )?.value;
 
-
     const file =
         document.getElementById(
             "file"
         )?.files[0];
 
-
     const msg =
         document.getElementById(
             "msg"
         );
-
 
     if (!title) {
 
@@ -1025,7 +925,6 @@ async function uploadDocument() {
         return;
     }
 
-
     if (!file) {
 
         if (msg) {
@@ -1037,24 +936,20 @@ async function uploadDocument() {
         return;
     }
 
-
     try {
 
         const form =
             new FormData();
-
 
         form.append(
             "title",
             title
         );
 
-
         form.append(
             "description",
             description || ""
         );
-
 
         if (categoryId) {
 
@@ -1064,27 +959,22 @@ async function uploadDocument() {
             );
         }
 
-
         form.append(
             "file",
             file
         );
 
-
         const headers =
             {};
 
-
         const token =
             getToken();
-
 
         if (token) {
 
             headers.Authorization =
                 "Bearer " + token;
         }
-
 
         await apiRequest(
             "/api/documents",
@@ -1099,13 +989,11 @@ async function uploadDocument() {
             }
         );
 
-
         if (msg) {
 
             msg.innerText =
                 "Documento salvo com sucesso.";
         }
-
 
     } catch (error) {
 
@@ -1130,15 +1018,12 @@ async function initCategoriesPage() {
                 true
         });
 
-
     if (!ok) {
         return;
     }
 
-
     await loadCategories();
 }
-
 
 async function loadCategories() {
 
@@ -1156,27 +1041,22 @@ async function loadCategories() {
             }
         );
 
-
     const tbody =
         document.querySelector(
             "#categoriesTable tbody"
         );
 
-
     if (!tbody) {
         return;
     }
 
-
     tbody.innerHTML =
         "";
-
 
     data.forEach(
         category => {
 
             tbody.innerHTML += `
-
                 <tr>
 
                     <td>
@@ -1194,12 +1074,10 @@ async function loadCategories() {
                     </td>
 
                 </tr>
-
             `;
         }
     );
 }
-
 
 async function createCategory() {
 
@@ -1208,18 +1086,15 @@ async function createCategory() {
             "categoryName"
         )?.value.trim();
 
-
     const description =
         document.getElementById(
             "categoryDescription"
         )?.value.trim();
 
-
     const msg =
         document.getElementById(
             "categoryMsg"
         );
-
 
     try {
 
@@ -1242,16 +1117,13 @@ async function createCategory() {
             }
         );
 
-
         if (msg) {
 
             msg.innerText =
                 "Categoria cadastrada.";
         }
 
-
         await loadCategories();
-
 
     } catch (error) {
 
@@ -1263,7 +1135,6 @@ async function createCategory() {
     }
 }
 
-
 async function loadCategoriesSelect(
     selectId
 ) {
@@ -1273,11 +1144,9 @@ async function loadCategoriesSelect(
             selectId
         );
 
-
     if (!select) {
         return;
     }
-
 
     const data =
         await apiRequest(
@@ -1293,14 +1162,12 @@ async function loadCategoriesSelect(
             }
         );
 
-
     select.innerHTML =
         `
             <option value="">
                 Sem categoria
             </option>
         `;
-
 
     data.forEach(
         category => {
@@ -1327,15 +1194,12 @@ async function initUsersPage() {
                 true
         });
 
-
     if (!ok) {
         return;
     }
 
-
     await loadUsers();
 }
-
 
 async function loadUsers() {
 
@@ -1353,27 +1217,22 @@ async function loadUsers() {
             }
         );
 
-
     const tbody =
         document.querySelector(
             "#usersTable tbody"
         );
 
-
     if (!tbody) {
         return;
     }
 
-
     tbody.innerHTML =
         "";
-
 
     users.forEach(
         user => {
 
             tbody.innerHTML += `
-
                 <tr>
 
                     <td>
@@ -1403,12 +1262,10 @@ async function loadUsers() {
                     </td>
 
                 </tr>
-
             `;
         }
     );
 }
-
 
 async function createUser() {
 
@@ -1417,24 +1274,20 @@ async function createUser() {
             "userName"
         )?.value.trim();
 
-
     const email =
         document.getElementById(
             "userEmail"
         )?.value.trim();
-
 
     const password =
         document.getElementById(
             "userPassword"
         )?.value;
 
-
     const role =
         document.getElementById(
             "userRole"
         )?.value;
-
 
     await apiRequest(
         "/api/users",
@@ -1457,7 +1310,6 @@ async function createUser() {
         }
     );
 
-
     await loadUsers();
 }
 
@@ -1475,11 +1327,9 @@ async function loadUsersSelect(
             selectId
         );
 
-
     if (!select) {
         return;
     }
-
 
     const users =
         await apiRequest(
@@ -1495,14 +1345,12 @@ async function loadUsersSelect(
             }
         );
 
-
     select.innerHTML =
         `
             <option value="">
                 Selecione um usuário
             </option>
         `;
-
 
     users.forEach(
         user => {
@@ -1516,23 +1364,16 @@ async function loadUsersSelect(
                 return;
             }
 
-
             select.innerHTML += `
-
                 <option value="${user.id}">
-
                     ${escapeHtml(
                         user.name
                     )}
-
                     -
-
                     ${escapeHtml(
                         user.email
                     )}
-
                 </option>
-
             `;
         }
     );
@@ -1552,11 +1393,9 @@ async function loadDocumentsSelect(
             selectId
         );
 
-
     if (!select) {
         return;
     }
-
 
     const documents =
         await apiRequest(
@@ -1572,14 +1411,12 @@ async function loadDocumentsSelect(
             }
         );
 
-
     select.innerHTML =
         `
             <option value="">
                 Selecione um documento
             </option>
         `;
-
 
     documents.forEach(
         doc => {
@@ -1614,7 +1451,6 @@ async function downloadDocument(
             }
         );
 
-
     if (!response.ok) {
 
         alert(
@@ -1626,33 +1462,26 @@ async function downloadDocument(
         return;
     }
 
-
     const blob =
         await response.blob();
-
 
     const url =
         URL.createObjectURL(
             blob
         );
 
-
     const link =
         document.createElement(
             "a"
         );
 
-
     link.href =
         url;
-
 
     link.download =
         "documento";
 
-
     link.click();
-
 
     URL.revokeObjectURL(
         url
@@ -1674,11 +1503,11 @@ async function initSendPage() {
             ]
         });
 
-
     if (!ok) {
         return;
     }
 
+    pendingSenderSignature = null;
 
     await Promise.all([
         loadDocumentsSelect(
@@ -1689,8 +1518,197 @@ async function initSendPage() {
             "sendReceiverId"
         )
     ]);
+
+    const documentSelect =
+        document.getElementById(
+            "sendDocumentId"
+        );
+
+    if (documentSelect) {
+
+        documentSelect.addEventListener(
+            "change",
+            function () {
+
+                pendingSenderSignature = null;
+
+                clearEmbeddedViewer();
+
+                const msg =
+                    document.getElementById(
+                        "sendMsg"
+                    );
+
+                if (msg) {
+                    msg.innerText = "";
+                }
+            }
+        );
+    }
 }
 
+
+/* =====================================================
+   VISUALIZAR DOCUMENTO ANTES DE ENVIAR
+===================================================== */
+
+async function previewSelectedDocumentForSend() {
+
+    const documentId =
+        document
+            .getElementById(
+                "sendDocumentId"
+            )
+            ?.value;
+
+    if (!documentId) {
+
+        alert(
+            "Selecione um documento."
+        );
+
+        return;
+    }
+
+    try {
+
+        await openEmbeddedViewer({
+
+            mode:
+                "view",
+
+            documentId:
+                documentId,
+
+            transferId:
+                null,
+
+            containerId:
+                "embeddedPdfContainer",
+
+            infoId:
+                "sendViewerInfo",
+
+            titleId:
+                "sendViewerTitle",
+
+            buttonId:
+                "confirmOwnSignBtn",
+
+            titleText:
+                "Visualização do documento"
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao visualizar documento:",
+            error
+        );
+
+        const info =
+            document.getElementById(
+                "sendViewerInfo"
+            );
+
+        if (info) {
+
+            info.innerText =
+                error.message ||
+                "Não foi possível visualizar o documento.";
+        }
+    }
+}
+
+
+/* =====================================================
+   PREPARAR ASSINATURA DO REMETENTE
+===================================================== */
+
+async function prepareOwnDocumentSignature() {
+
+    const documentId =
+        document
+            .getElementById(
+                "sendDocumentId"
+            )
+            ?.value;
+
+    if (!documentId) {
+
+        alert(
+            "Selecione um documento."
+        );
+
+        return;
+    }
+
+    pendingSenderSignature = null;
+
+    try {
+
+        await openEmbeddedViewer({
+
+            mode:
+                "own",
+
+            documentId:
+                documentId,
+
+            transferId:
+                null,
+
+            containerId:
+                "embeddedPdfContainer",
+
+            infoId:
+                "sendViewerInfo",
+
+            titleId:
+                "sendViewerTitle",
+
+            buttonId:
+                "confirmOwnSignBtn",
+
+            titleText:
+                "Posicionar assinatura antes do envio"
+        });
+
+        const info =
+            document.getElementById(
+                "sendViewerInfo"
+            );
+
+        if (info) {
+            info.innerText =
+                "Clique no ponto onde deseja inserir sua assinatura. O documento original não será alterado.";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao preparar assinatura:",
+            error
+        );
+
+        const info =
+            document.getElementById(
+                "sendViewerInfo"
+            );
+
+        if (info) {
+
+            info.innerText =
+                error.message ||
+                "Não foi possível preparar a assinatura.";
+        }
+    }
+}
+
+
+/* =====================================================
+   ENVIAR DOCUMENTO
+===================================================== */
 
 async function sendDocumentToUser() {
 
@@ -1699,39 +1717,109 @@ async function sendDocumentToUser() {
             "sendDocumentId"
         )?.value;
 
-
     const receiverId =
         document.getElementById(
             "sendReceiverId"
         )?.value;
-
 
     const msg =
         document.getElementById(
             "sendMsg"
         );
 
+    if (!documentId) {
+
+        if (msg) {
+            msg.innerText =
+                "Selecione um documento.";
+        }
+
+        return;
+    }
+
+    if (!receiverId) {
+
+        if (msg) {
+            msg.innerText =
+                "Selecione um destinatário.";
+        }
+
+        return;
+    }
 
     try {
 
-        await apiRequest(
-            `/api/documents/${documentId}/send`,
-            {
-                method:
-                    "POST",
+        if (msg) {
+            msg.innerText =
+                "Criando cópia e enviando documento...";
+        }
 
-                headers:
-                    authHeaders(
-                        true
-                    ),
+        const transfer =
+            await apiRequest(
+                `/api/documents/${documentId}/send`,
+                {
+                    method:
+                        "POST",
 
-                body:
-                    JSON.stringify({
-                        receiverId
-                    })
+                    headers:
+                        authHeaders(
+                            true
+                        ),
+
+                    body:
+                        JSON.stringify({
+                            receiverId
+                        })
+                }
+            );
+
+        if (
+            !transfer ||
+            !transfer.id
+        ) {
+
+            throw new Error(
+                "A transferência foi criada, mas o servidor não retornou o ID."
+            );
+        }
+
+        if (pendingSenderSignature) {
+
+            if (msg) {
+                msg.innerText =
+                    "Aplicando assinatura na cópia da transferência...";
             }
-        );
 
+            await apiRequest(
+                `/api/transfers/${transfer.id}/sign-sender`,
+                {
+                    method:
+                        "PATCH",
+
+                    headers:
+                        authHeaders(
+                            true
+                        ),
+
+                    body:
+                        JSON.stringify({
+
+                            page:
+                                pendingSenderSignature.page,
+
+                            x:
+                                pendingSenderSignature.x,
+
+                            y:
+                                pendingSenderSignature.y
+                        })
+                }
+            );
+        }
+
+        pendingSenderSignature = null;
+
+        clearEmbeddedViewer();
 
         if (msg) {
 
@@ -1739,8 +1827,12 @@ async function sendDocumentToUser() {
                 "Documento enviado com sucesso.";
         }
 
-
     } catch (error) {
+
+        console.error(
+            "Erro ao enviar documento:",
+            error
+        );
 
         if (msg) {
 
@@ -1765,101 +1857,202 @@ async function initInboxPage() {
             ]
         });
 
-
     if (!ok) {
         return;
     }
 
-
     await loadInbox();
 }
 
-
 async function loadInbox() {
 
-    const transfers =
-        await apiRequest(
-            "/api/transfers/inbox",
-            {
-                method:
-                    "GET",
+    try {
 
-                headers:
-                    authHeaders(
-                        false
-                    )
+        const transfers =
+            await apiRequest(
+                `/api/transfers/inbox?t=${Date.now()}`,
+                {
+                    method:
+                        "GET",
+
+                    headers:
+                        authHeaders(
+                            false
+                        )
+                }
+            );
+
+        const tbody =
+            document.querySelector(
+                "#inboxTable tbody"
+            );
+
+        const empty =
+            document.getElementById(
+                "inboxEmptyState"
+            );
+
+        if (!tbody) {
+            return;
+        }
+
+        const wrapper =
+            tbody.closest(
+                ".table-wrapper"
+            );
+
+        tbody.innerHTML =
+            "";
+
+        if (
+            !Array.isArray(transfers) ||
+            transfers.length === 0
+        ) {
+
+            if (wrapper) {
+
+                wrapper.style.display =
+                    "none";
+            }
+
+            if (empty) {
+
+                empty.style.display =
+                    "block";
+            }
+
+            return;
+        }
+
+        if (wrapper) {
+
+            wrapper.style.display =
+                "block";
+        }
+
+        if (empty) {
+
+            empty.style.display =
+                "none";
+        }
+
+        transfers.forEach(
+            item => {
+
+                const canSign =
+                    item.status === "SENT"
+                    ||
+                    item.status === "READ";
+
+                tbody.innerHTML += `
+
+                    <tr>
+
+                        <td>
+
+                            <div class="table-title">
+
+                                ${escapeHtml(
+                                    item.documentTitle
+                                    ??
+                                    "Documento"
+                                )}
+
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHtml(
+                                item.senderName
+                                ??
+                                "-"
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            ${renderStatus(
+                                item.status
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            ${formatDate(
+                                item.sentAt
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            ${
+                                item.readAt
+                                    ?
+                                    formatDate(
+                                        item.readAt
+                                    )
+                                    :
+                                    "-"
+                            }
+
+                        </td>
+
+                        <td>
+
+                            <div class="action-row">
+
+                                <button
+                                    class="btn-secondary small-btn"
+                                    onclick="previewReceivedTransfer(
+                                        '${item.id}',
+                                        '${item.documentId}',
+                                        '${item.status}'
+                                    )"
+                                >
+                                    Visualizar
+                                </button>
+
+                                ${
+                                    canSign
+                                        ?
+                                        `
+                                            <button
+                                                class="btn-primary small-btn"
+                                                onclick="prepareTransferSignature(
+                                                    '${item.id}',
+                                                    '${item.documentId}'
+                                                )"
+                                            >
+                                                Assinar
+                                            </button>
+                                        `
+                                        :
+                                        ""
+                                }
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
             }
         );
 
+    } catch (error) {
 
-    const tbody =
-        document.querySelector(
-            "#inboxTable tbody"
+        console.error(
+            "Erro ao carregar recebidos:",
+            error
         );
-
-
-    if (!tbody) {
-        return;
     }
-
-
-    tbody.innerHTML =
-        "";
-
-
-    transfers.forEach(
-        item => {
-
-            tbody.innerHTML += `
-
-                <tr>
-
-                    <td>
-                        ${escapeHtml(
-                            item.documentTitle
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            item.senderName
-                        )}
-                    </td>
-
-                    <td>
-                        ${renderStatus(
-                            item.status
-                        )}
-                    </td>
-
-                    <td>
-                        ${formatDate(
-                            item.sentAt
-                        )}
-                    </td>
-
-                    <td>
-
-                        <button
-                            class="btn-secondary small-btn"
-                            onclick="previewReceivedTransfer(
-                                '${item.id}',
-                                '${item.documentId}',
-                                '${item.status}'
-                            )"
-                        >
-                            Visualizar
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `;
-        }
-    );
 }
-
 
 async function previewReceivedTransfer(
     transferId,
@@ -1867,60 +2060,126 @@ async function previewReceivedTransfer(
     status
 ) {
 
-    await openEmbeddedViewer({
-        mode:
-            "view",
+    try {
 
-        documentId,
+        if (
+            status === "SENT"
+        ) {
 
-        transferId,
+            await apiRequest(
+                `/api/transfers/${transferId}/read`,
+                {
+                    method:
+                        "PATCH",
 
-        containerId:
-            "embeddedPdfContainer",
+                    headers:
+                        authHeaders(
+                            false
+                        )
+                }
+            );
+        }
 
-        infoId:
-            "viewerInfo",
+        await openEmbeddedViewer({
 
-        titleId:
-            "viewerTitle",
+            mode:
+                "view",
 
-        buttonId:
-            "confirmSignBtn",
+            documentId:
+                documentId,
 
-        titleText:
-            "Visualização do documento recebido"
-    });
+            transferId:
+                transferId,
+
+            containerId:
+                "embeddedPdfContainer",
+
+            infoId:
+                "viewerInfo",
+
+            titleId:
+                "viewerTitle",
+
+            buttonId:
+                "confirmSignBtn",
+
+            titleText:
+                "Visualização do documento recebido"
+        });
+
+        await loadInbox();
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao visualizar documento recebido:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Não foi possível visualizar o documento."
+        );
+    }
 }
-
 
 async function prepareTransferSignature(
     transferId,
     documentId
 ) {
 
-    await openEmbeddedViewer({
-        mode:
-            "transfer",
+    try {
 
-        documentId,
+        await openEmbeddedViewer({
 
-        transferId,
+            mode:
+                "transfer",
 
-        containerId:
-            "embeddedPdfContainer",
+            documentId:
+                documentId,
 
-        infoId:
-            "viewerInfo",
+            transferId:
+                transferId,
 
-        titleId:
-            "viewerTitle",
+            containerId:
+                "embeddedPdfContainer",
 
-        buttonId:
-            "confirmSignBtn",
+            infoId:
+                "viewerInfo",
 
-        titleText:
-            "Assinatura do documento recebido"
-    });
+            titleId:
+                "viewerTitle",
+
+            buttonId:
+                "confirmSignBtn",
+
+            titleText:
+                "Posicionar assinatura"
+        });
+
+        const info =
+            document.getElementById(
+                "viewerInfo"
+            );
+
+        if (info) {
+
+            info.innerText =
+                "Clique no ponto do documento onde deseja inserir a assinatura.";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao preparar assinatura:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Não foi possível preparar a assinatura."
+        );
+    }
 }
 
 
@@ -1933,30 +2192,102 @@ async function openEmbeddedViewer(
 ) {
 
     embeddedSignState = {
-        ...embeddedSignState,
-        ...config
-    };
 
+        mode:
+            config.mode,
+
+        documentId:
+            config.documentId,
+
+        transferId:
+            config.transferId,
+
+        page:
+            null,
+
+        x:
+            null,
+
+        y:
+            null,
+
+        previewEl:
+            null,
+
+        targetContainerId:
+            config.containerId,
+
+        targetInfoId:
+            config.infoId,
+
+        targetButtonId:
+            config.buttonId
+    };
 
     const container =
         document.getElementById(
             config.containerId
         );
 
+    const info =
+        document.getElementById(
+            config.infoId
+        );
+
+    const title =
+        document.getElementById(
+            config.titleId
+        );
+
+    const confirmButton =
+        document.getElementById(
+            config.buttonId
+        );
 
     if (!container) {
-        return;
-    }
 
+        throw new Error(
+            "Área de visualização do documento não encontrada."
+        );
+    }
 
     container.innerHTML =
         "";
 
+    if (title) {
+
+        title.innerText =
+            config.titleText ||
+            "Visualização do documento";
+    }
+
+    if (info) {
+
+        if (
+            config.mode === "view"
+        ) {
+
+            info.innerText =
+                "Carregando documento...";
+
+        } else {
+
+            info.innerText =
+                "Clique no ponto do documento onde deseja inserir a assinatura.";
+        }
+    }
+
+    if (confirmButton) {
+
+        confirmButton.disabled =
+            true;
+    }
 
     let url;
 
-
-    if (config.transferId) {
+    if (
+        config.transferId
+    ) {
 
         url =
             `/api/transfers/${config.transferId}/view`;
@@ -1966,7 +2297,6 @@ async function openEmbeddedViewer(
         url =
             `/api/documents/${config.documentId}/view`;
     }
-
 
     const response =
         await fetch(
@@ -1979,14 +2309,41 @@ async function openEmbeddedViewer(
             }
         );
 
+    if (!response.ok) {
+
+        throw new Error(
+            await readErrorMessage(
+                response
+            )
+        );
+    }
 
     const blob =
         await response.blob();
 
+    if (
+        !blob.type.includes(
+            "pdf"
+        )
+    ) {
+
+        throw new Error(
+            "Somente documentos PDF podem ser assinados."
+        );
+    }
+
+    if (
+        typeof pdfjsLib ===
+        "undefined"
+    ) {
+
+        throw new Error(
+            "O visualizador PDF não foi carregado."
+        );
+    }
 
     const buffer =
         await blob.arrayBuffer();
-
 
     const pdf =
         await pdfjsLib
@@ -1996,75 +2353,568 @@ async function openEmbeddedViewer(
             })
             .promise;
 
-
     for (
-        let number = 1;
-        number <= pdf.numPages;
-        number++
+        let pageNumber = 1;
+        pageNumber <= pdf.numPages;
+        pageNumber++
     ) {
 
         const page =
             await pdf.getPage(
-                number
+                pageNumber
             );
-
 
         const scale =
             1.4;
-
 
         const viewport =
             page.getViewport({
                 scale
             });
 
-
         const wrapper =
             document.createElement(
                 "div"
             );
 
-
         wrapper.className =
             "pdf-page-wrapper";
 
+        wrapper.style.position =
+            "relative";
 
         const canvas =
             document.createElement(
                 "canvas"
             );
 
-
         canvas.className =
             "pdf-page-canvas";
-
 
         canvas.width =
             viewport.width;
 
-
         canvas.height =
             viewport.height;
 
+        const context =
+            canvas.getContext(
+                "2d"
+            );
 
         await page.render({
-            canvasContext:
-                canvas.getContext(
-                    "2d"
-                ),
 
-            viewport
+            canvasContext:
+                context,
+
+            viewport:
+                viewport
+
         }).promise;
 
+        if (
+            config.mode !== "view"
+        ) {
+
+            canvas.style.cursor =
+                "crosshair";
+
+            canvas.addEventListener(
+                "click",
+                function (event) {
+
+                    handleSignaturePlacement(
+                        event,
+                        canvas,
+                        wrapper,
+                        pageNumber,
+                        scale
+                    );
+                }
+            );
+        }
 
         wrapper.appendChild(
             canvas
         );
 
-
         container.appendChild(
             wrapper
         );
+    }
+
+    if (
+        info &&
+        config.mode === "view"
+    ) {
+
+        info.innerText =
+            "Documento carregado com sucesso.";
+    }
+}
+
+
+/* =====================================================
+   POSICIONAR ASSINATURA NO PDF
+===================================================== */
+
+function handleSignaturePlacement(
+    event,
+    canvas,
+    wrapper,
+    pageNumber,
+    scale
+) {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const scaleX =
+        canvas.width /
+        rect.width;
+
+    const scaleY =
+        canvas.height /
+        rect.height;
+
+    const clickXCanvas =
+        (
+            event.clientX -
+            rect.left
+        )
+        *
+        scaleX;
+
+    const clickYCanvas =
+        (
+            event.clientY -
+            rect.top
+        )
+        *
+        scaleY;
+
+    const pdfX =
+        clickXCanvas /
+        scale;
+
+    let pdfY =
+        (
+            canvas.height -
+            clickYCanvas
+        )
+        /
+        scale
+        -
+        72;
+
+    if (
+        pdfY < 0
+    ) {
+
+        pdfY =
+            0;
+    }
+
+    embeddedSignState.page =
+        pageNumber;
+
+    embeddedSignState.x =
+        pdfX;
+
+    embeddedSignState.y =
+        pdfY;
+
+    if (
+        embeddedSignState.previewEl
+    ) {
+
+        embeddedSignState
+            .previewEl
+            .remove();
+    }
+
+    const preview =
+        document.createElement(
+            "div"
+        );
+
+    preview.className =
+        "signature-preview";
+
+    const visibleX =
+        event.clientX -
+        rect.left;
+
+    const visibleY =
+        event.clientY -
+        rect.top;
+
+    preview.style.left =
+        `${visibleX}px`;
+
+    preview.style.top =
+        `${visibleY}px`;
+
+    preview.innerHTML = `
+
+        <strong>
+            DOCUMENTO ASSINADO
+        </strong>
+
+        <br>
+
+        ${escapeHtml(
+            currentUser?.name
+            ??
+            "Usuário"
+        )}
+
+        <br>
+
+        ${new Date()
+            .toLocaleString(
+                "pt-BR"
+            )}
+
+    `;
+
+    wrapper.appendChild(
+        preview
+    );
+
+    embeddedSignState.previewEl =
+        preview;
+
+    const info =
+        document.getElementById(
+            embeddedSignState
+                .targetInfoId
+        );
+
+    if (info) {
+
+        info.innerText =
+            `Assinatura posicionada na página ${pageNumber}. Clique em Confirmar Assinatura.`;
+    }
+
+    const button =
+        document.getElementById(
+            embeddedSignState
+                .targetButtonId
+        );
+
+    if (button) {
+
+        button.disabled =
+            false;
+    }
+}
+
+
+/* =====================================================
+   CONFIRMAR ASSINATURA
+===================================================== */
+
+async function confirmEmbeddedSignature() {
+
+    if (
+        embeddedSignState.page === null ||
+        embeddedSignState.x === null ||
+        embeddedSignState.y === null
+    ) {
+
+        alert(
+            "Clique no documento para escolher onde a assinatura deve aparecer."
+        );
+
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            embeddedSignState.targetButtonId
+        );
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.innerText =
+            "Assinando...";
+    }
+
+    try {
+
+        /* =================================================
+           ASSINATURA DO REMETENTE ANTES DO ENVIO
+        ================================================= */
+
+        if (
+            embeddedSignState.mode === "own"
+        ) {
+
+            pendingSenderSignature = {
+
+                documentId:
+                    embeddedSignState.documentId,
+
+                page:
+                    embeddedSignState.page,
+
+                x:
+                    embeddedSignState.x,
+
+                y:
+                    embeddedSignState.y
+            };
+
+            clearEmbeddedViewer();
+
+            const info =
+                document.getElementById(
+                    "sendViewerInfo"
+                );
+
+            if (info) {
+                info.innerText =
+                    "Assinatura preparada. Agora escolha o destinatário e clique em Enviar Documento.";
+            }
+
+            alert(
+                "Posição da assinatura salva. A assinatura será aplicada somente na cópia enviada."
+            );
+
+            return;
+        }
+
+
+        /* =================================================
+           DOCUMENTO RECEBIDO
+        ================================================= */
+
+        if (
+            embeddedSignState.mode === "transfer"
+        ) {
+
+            /*
+             * ALTERAÇÃO APENAS PARA MELHORAR
+             * O FEEDBACK DURANTE O DELAY.
+             */
+            if (button) {
+
+                button.disabled =
+                    true;
+
+                button.innerText =
+                    "Assinando e devolvendo...";
+            }
+
+            const info =
+                document.getElementById(
+                    embeddedSignState.targetInfoId
+                );
+
+            if (info) {
+
+                info.innerText =
+                    "Processando assinatura e devolvendo o documento...";
+            }
+
+
+            const transferId =
+                embeddedSignState.transferId;
+
+
+            const updatedTransfer =
+                await apiRequest(
+                    `/api/transfers/${transferId}/sign`,
+                    {
+                        method:
+                            "PATCH",
+
+                        headers:
+                            authHeaders(
+                                true
+                            ),
+
+                        body:
+                            JSON.stringify({
+
+                                page:
+                                    embeddedSignState.page,
+
+                                x:
+                                    embeddedSignState.x,
+
+                                y:
+                                    embeddedSignState.y
+                            })
+                    }
+                );
+
+
+            if (
+                !updatedTransfer ||
+                updatedTransfer.status !== "RETURNED"
+            ) {
+
+                console.error(
+                    "Transferência retornada pelo backend:",
+                    updatedTransfer
+                );
+
+                throw new Error(
+                    "O documento foi assinado, mas a transferência não foi marcada como devolvida."
+                );
+            }
+
+
+            /*
+             * ALTERAÇÃO DO DELAY:
+             * atualiza a caixa antes de limpar o PDF.
+             */
+            if (
+                typeof loadInbox ===
+                "function"
+            ) {
+
+                await loadInbox();
+            }
+
+
+            clearEmbeddedViewer();
+
+
+            alert(
+                "Documento assinado e devolvido com sucesso."
+            );
+
+            return;
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao assinar documento:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Não foi possível assinar o documento."
+        );
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.innerText =
+                "Confirmar Assinatura";
+        }
+    }
+}
+
+
+/* =====================================================
+   LIMPAR VISUALIZADOR
+===================================================== */
+
+function clearEmbeddedViewer() {
+
+    embeddedSignState = {
+
+        mode:
+            null,
+
+        documentId:
+            null,
+
+        transferId:
+            null,
+
+        page:
+            null,
+
+        x:
+            null,
+
+        y:
+            null,
+
+        previewEl:
+            null,
+
+        targetContainerId:
+            null,
+
+        targetInfoId:
+            null,
+
+        targetButtonId:
+            null
+    };
+
+    const container =
+        document.getElementById(
+            "embeddedPdfContainer"
+        );
+
+    if (container) {
+
+        container.innerHTML =
+            "";
+    }
+
+    const sendInfo =
+        document.getElementById(
+            "sendViewerInfo"
+        );
+
+    if (sendInfo) {
+
+        sendInfo.innerText =
+            "Selecione um documento acima para visualizar.";
+    }
+
+    const inboxInfo =
+        document.getElementById(
+            "viewerInfo"
+        );
+
+    if (inboxInfo) {
+
+        inboxInfo.innerText =
+            "Selecione um documento para visualizar.";
+    }
+
+    const ownButton =
+        document.getElementById(
+            "confirmOwnSignBtn"
+        );
+
+    if (ownButton) {
+
+        ownButton.disabled =
+            true;
+
+        ownButton.innerText =
+            "Confirmar Assinatura";
+    }
+
+    const transferButton =
+        document.getElementById(
+            "confirmSignBtn"
+        );
+
+    if (transferButton) {
+
+        transferButton.disabled =
+            true;
+
+        transferButton.innerText =
+            "Confirmar Assinatura";
     }
 }
 
@@ -2083,15 +2933,12 @@ async function initFoldersPage() {
             ]
         });
 
-
     if (!ok) {
         return;
     }
 
-
     await loadFolders();
 }
-
 
 async function loadFolders() {
 
@@ -2109,21 +2956,17 @@ async function loadFolders() {
             }
         );
 
-
     const grid =
         document.getElementById(
             "foldersGrid"
         );
 
-
     if (!grid) {
         return;
     }
 
-
     grid.innerHTML =
         "";
-
 
     categories.forEach(
         category => {
@@ -2133,10 +2976,8 @@ async function loadFolders() {
                     "div"
                 );
 
-
             card.className =
                 "folder-card";
-
 
             card.innerHTML = `
 
@@ -2160,7 +3001,6 @@ async function loadFolders() {
 
             `;
 
-
             card.addEventListener(
                 "click",
                 () => {
@@ -2173,14 +3013,12 @@ async function loadFolders() {
                 }
             );
 
-
             grid.appendChild(
                 card
             );
         }
     );
 }
-
 
 async function loadDocumentsByCategory(
     categoryId,
@@ -2202,12 +3040,10 @@ async function loadDocumentsByCategory(
             }
         );
 
-
     const section =
         document.getElementById(
             "folderDocumentsSection"
         );
-
 
     if (section) {
 
@@ -2215,12 +3051,10 @@ async function loadDocumentsByCategory(
             "block";
     }
 
-
     const title =
         document.getElementById(
             "selectedCategoryTitle"
         );
-
 
     if (title) {
 
@@ -2228,12 +3062,10 @@ async function loadDocumentsByCategory(
             `Pasta: ${categoryName}`;
     }
 
-
     const description =
         document.getElementById(
             "selectedCategoryDescription"
         );
-
 
     if (description) {
 
@@ -2242,21 +3074,17 @@ async function loadDocumentsByCategory(
             "Sem descrição";
     }
 
-
     const tbody =
         document.querySelector(
             "#categoryDocumentsTable tbody"
         );
 
-
     if (!tbody) {
         return;
     }
 
-
     tbody.innerHTML =
         "";
-
 
     documents.forEach(
         doc => {
@@ -2312,15 +3140,12 @@ async function initAuditPage() {
                 true
         });
 
-
     if (!ok) {
         return;
     }
 
-
     await loadAudit();
 }
-
 
 async function loadAudit() {
 
@@ -2338,21 +3163,17 @@ async function loadAudit() {
             }
         );
 
-
     const tbody =
         document.querySelector(
             "#auditTable tbody"
         );
 
-
     if (!tbody) {
         return;
     }
 
-
     tbody.innerHTML =
         "";
-
 
     data.forEach(
         item => {
