@@ -100,6 +100,8 @@
                     Recebidos
                 </a>
 
+                <a href="dashboard.html#returnedDocuments">Devolvidos</a>
+
                 <a href="send.html">
                     Enviar para Usuário
                 </a>
@@ -445,7 +447,9 @@
                         placeholder="Digite o título do documento..."
                 >
 
-                <button
+                <select id="searchCategoryId" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option></select>
+
+                    <button
                         class="btn-primary"
                         onclick="searchDashboardDocuments()"
                 >
@@ -563,11 +567,29 @@
         </section>
 
 
+        <section class="glass-card" id="returnedDocuments">
+            <div class="section-header">
+                <div><h2 class="section-title">Devolvidos</h2>
+                <p class="section-description">Cópias assinadas e devolvidas pelos destinatários.</p></div>
+                <button id="refreshReturnedBtn" class="btn-secondary" onclick="loadReturnedTransfers()">Atualizar</button>
+            </div>
+            <p id="returnedListInfo" class="section-description" role="status" aria-live="polite"></p>
+            <div class="table-wrapper"><table class="modern-table" id="returnedTable">
+                <thead><tr><th>Documento</th><th>Destinatário</th><th>Situação</th><th>Ações</th></tr></thead>
+                <tbody></tbody>
+            </table></div>
+        </section>
+        <section class="glass-card viewer-card">
+            <h2 class="section-title" id="returnedViewerTitle">Documento devolvido</h2>
+            <p class="section-description" id="returnedViewerInfo">Selecione uma transferência em Devolvidos.</p>
+            <div id="returnedPdfContainer" class="pdf-container"></div>
+        </section>
     </main>
 
 </div>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 

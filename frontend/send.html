@@ -648,6 +648,7 @@
 <script>
 
     function clearSendForm() {
+            if (sendInProgress || pendingSend) return;
 
         const documentSelect =
             document.getElementById(

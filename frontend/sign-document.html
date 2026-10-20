@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Assinar Documento</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body class="panel-body" onload="initSignPage()">
   <div class="bg-grid"></div>
@@ -44,11 +44,11 @@
 
       <section class="glass-card">
         <div class="signature-toolbar">
-          <button class="btn-primary" onclick="confirmSignature()">Confirmar Assinatura</button>
-          <span id="signInfo" class="muted-text">Clique no PDF para escolher a posição.</span>
+          <button class="btn-primary" id="confirmSignBtn" disabled onclick="confirmEmbeddedSignature()">Confirmar Assinatura</button>
+          <span id="viewerInfo" class="muted-text">Clique no PDF para escolher a posição.</span>
         </div>
 
-        <div id="pdfContainer" class="pdf-container"></div>
+        <div id="embeddedPdfContainer" class="pdf-container"></div>
       </section>
     </main>
   </div>

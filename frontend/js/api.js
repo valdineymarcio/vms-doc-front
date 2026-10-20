@@ -398,11 +398,14 @@ async function readErrorMessage(
         );
     }
 
-    return (
-        "Erro HTTP "
-        +
-        response.status
-    );
+    return ({
+        400: 'Dados inválidos.',
+        401: 'Autenticação necessária ou inválida. Entre novamente.',
+        403: 'Acesso negado.',
+        404: 'Recurso ausente ou indisponível para este usuário.',
+        409: 'Conflito com o estado atual do recurso.',
+        500: 'Falha interna do servidor.'
+    })[response.status] || ('Erro HTTP ' + response.status);
 }
 
 async function apiRequest(
@@ -417,7 +420,13 @@ async function apiRequest(
         response =
             await fetch(
                 API + path,
-                options
+                {
+                    ...options,
+                    headers: {
+                        ...(path === '/api/auth/login' ? {} : authHeaders(false)),
+                        ...options.headers
+                    }
+                }
             );
 
     } catch (error) {
@@ -435,6 +444,7 @@ async function apiRequest(
             await readErrorMessage(
                 response
             );
+        logTransferResponse(path, response, {message});
 
         if (
             response.status === 401
@@ -446,6 +456,7 @@ async function apiRequest(
 
             if (!loginRequest) {
 
+                sessionStorage.setItem("authError", message);
                 localStorage.removeItem(
                     "token"
                 );
@@ -454,25 +465,19 @@ async function apiRequest(
                     "index.html";
             }
 
-            throw new Error(
-                message ||
-                "E-mail ou senha inválidos."
-            );
+            throw Object.assign(new Error(message), {status: response.status});
         }
 
         if (
             response.status === 403
         ) {
 
-            throw new Error(
-                message ||
-                "Você não possui permissão."
-            );
+            throw Object.assign(new Error(message), {status: response.status});
         }
 
-        throw new Error(
-            message
-        );
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
     }
 
     if (
@@ -493,9 +498,16 @@ async function apiRequest(
         )
     ) {
 
-        return response.json();
+        const data = await response.json();
+        if (path === '/api/transfers/returned') {
+            const fields = ['id', 'documentId', 'documentTitle', 'senderId', 'senderName', 'receiverId', 'receiverName', 'status', 'sentAt', 'readAt'];
+            logTransferResponse(path, response, Array.isArray(data) ? data.map(item =>
+                Object.fromEntries(fields.filter(key => key in item).map(key => [key, item[key]]))) : 'Expected array');
+        }
+        return data;
     }
 
+    logTransferResponse(path, response, {file: true, contentLength: response.headers.get("Content-Length")});
     return response;
 }
 
@@ -1165,7 +1177,7 @@ async function loadCategoriesSelect(
     select.innerHTML =
         `
             <option value="">
-                Sem categoria
+                ${selectId === "searchCategoryId" ? "Todas as categorias" : "Sem categoria"}
             </option>
         `;
 
@@ -1435,63 +1447,18 @@ async function loadDocumentsSelect(
    DOWNLOAD
 ===================================================== */
 
-async function downloadDocument(
-    id
-) {
-
-    const response =
-        await fetch(
-            API +
-            `/api/documents/${id}/download`,
-            {
-                headers:
-                    authHeaders(
-                        false
-                    )
-            }
-        );
-
-    if (!response.ok) {
-
-        alert(
-            await readErrorMessage(
-                response
-            )
-        );
-
-        return;
-    }
-
-    const blob =
-        await response.blob();
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-    const link =
-        document.createElement(
-            "a"
-        );
-
-    link.href =
-        url;
-
-    link.download =
-        "documento";
-
-    link.click();
-
-    URL.revokeObjectURL(
-        url
-    );
+async function downloadDocument(id) {
+    try {
+        const response = await apiRequest('/api/documents/' + id + '/download');
+        const url = URL.createObjectURL(await response.blob());
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'documento';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) { alert(error.message); }
 }
 
-
-/* =====================================================
-   ENVIAR
-===================================================== */
 
 async function initSendPage() {
 
@@ -1553,6 +1520,7 @@ async function initSendPage() {
 ===================================================== */
 
 async function previewSelectedDocumentForSend() {
+    if (sendInProgress) return;
 
     const documentId =
         document
@@ -1626,6 +1594,7 @@ async function previewSelectedDocumentForSend() {
 ===================================================== */
 
 async function prepareOwnDocumentSignature() {
+    if (sendInProgress) return;
 
     const documentId =
         document
@@ -1710,142 +1679,77 @@ async function prepareOwnDocumentSignature() {
    ENVIAR DOCUMENTO
 ===================================================== */
 
+let sendInProgress = false;
+let pendingSend = null;
+
+function validateSignaturePosition(position) {
+    if (!position || !Number.isInteger(position.page) || position.page < 1 ||
+        !Number.isFinite(position.x) || position.x < 0 ||
+        !Number.isFinite(position.y) || position.y < 0) {
+        throw new Error('Escolha uma página e coordenadas válidas para a assinatura.');
+    }
+    return {page: position.page, x: position.x, y: position.y};
+}
+
 async function sendDocumentToUser() {
-
-    const documentId =
-        document.getElementById(
-            "sendDocumentId"
-        )?.value;
-
-    const receiverId =
-        document.getElementById(
-            "sendReceiverId"
-        )?.value;
-
-    const msg =
-        document.getElementById(
-            "sendMsg"
-        );
-
-    if (!documentId) {
-
-        if (msg) {
-            msg.innerText =
-                "Selecione um documento.";
-        }
-
+    if (sendInProgress) return;
+    const documentId = document.getElementById('sendDocumentId')?.value;
+    const receiverId = document.getElementById('sendReceiverId')?.value;
+    const msg = document.getElementById('sendMsg');
+    const controls = [...document.querySelectorAll('button, #sendDocumentId, #sendReceiverId')];
+    const disabled = controls.map(control => control.disabled);
+    if (!documentId || !receiverId) {
+        if (msg) msg.innerText = 'Selecione um documento e um destinatário.';
         return;
     }
-
-    if (!receiverId) {
-
-        if (msg) {
-            msg.innerText =
-                "Selecione um destinatário.";
-        }
-
-        return;
-    }
-
+    sendInProgress = true;
+    controls.forEach(control => control.disabled = true);
     try {
-
-        if (msg) {
-            msg.innerText =
-                "Criando cópia e enviando documento...";
+        if (pendingSend && (pendingSend.documentId !== documentId || pendingSend.receiverId !== receiverId)) {
+            throw new Error('Conclua a assinatura do envio pendente antes de iniciar outro envio.');
         }
-
-        const transfer =
-            await apiRequest(
-                `/api/documents/${documentId}/send`,
-                {
-                    method:
-                        "POST",
-
-                    headers:
-                        authHeaders(
-                            true
-                        ),
-
-                    body:
-                        JSON.stringify({
-                            receiverId
-                        })
-                }
-            );
-
-        if (
-            !transfer ||
-            !transfer.id
-        ) {
-
-            throw new Error(
-                "A transferência foi criada, mas o servidor não retornou o ID."
-            );
+        const signature = pendingSend ? pendingSend.signature :
+            (pendingSenderSignature?.documentId === documentId ? validateSignaturePosition(pendingSenderSignature) : null);
+        if (!pendingSend) {
+            if (msg) msg.innerText = 'Criando cópia e enviando documento...';
+            const transfer = await apiRequest('/api/documents/' + documentId + '/send', {
+                method: 'POST', headers: authHeaders(), body: JSON.stringify({receiverId})
+            });
+            if (!transfer?.id || transfer.status !== 'SENT') throw new Error('Resposta de criação da transferência inválida. Confira o envio antes de tentar novamente.');
+            pendingSend = {id: transfer.id, documentId, receiverId, signature};
         }
-
-        if (pendingSenderSignature) {
-
-            if (msg) {
-                msg.innerText =
-                    "Aplicando assinatura na cópia da transferência...";
-            }
-
-            await apiRequest(
-                `/api/transfers/${transfer.id}/sign-sender`,
-                {
-                    method:
-                        "PATCH",
-
-                    headers:
-                        authHeaders(
-                            true
-                        ),
-
-                    body:
-                        JSON.stringify({
-
-                            page:
-                                pendingSenderSignature.page,
-
-                            x:
-                                pendingSenderSignature.x,
-
-                            y:
-                                pendingSenderSignature.y
-                        })
-                }
-            );
+        if (signature) {
+            if (msg) msg.innerText = 'Aplicando assinatura na cópia enviada...';
+            await apiRequest('/api/transfers/' + pendingSend.id + '/sign-sender', {
+                method: 'PATCH', headers: authHeaders(), body: JSON.stringify(signature)
+            });
         }
-
+        pendingSend = null;
         pendingSenderSignature = null;
-
         clearEmbeddedViewer();
-
-        if (msg) {
-
-            msg.innerText =
-                "Documento enviado com sucesso.";
-        }
-
+        document.getElementById('sendDocumentId').value = '';
+        document.getElementById('sendReceiverId').value = '';
+        if (msg) msg.innerText = 'Documento enviado com sucesso.';
     } catch (error) {
-
-        console.error(
-            "Erro ao enviar documento:",
-            error
-        );
-
-        if (msg) {
-
-            msg.innerText =
-                error.message;
+        if (msg) msg.innerText = (pendingSend ? 'A cópia já foi enviada. A assinatura não foi confirmada; tente novamente para assinar a mesma transferência. ' : '') + error.message;
+    } finally {
+        sendInProgress = false;
+        controls.forEach((control, index) => control.disabled = disabled[index]);
+        if (!pendingSend) {
+            document.getElementById("sendDocumentId").disabled = false;
+            document.getElementById("sendReceiverId").disabled = false;
+        }
+        if (!pendingSenderSignature) {
+            const button = document.getElementById('confirmOwnSignBtn');
+            if (button) button.disabled = true;
+        }
+        if (pendingSend) {
+            document.getElementById('sendDocumentId').disabled = true;
+            document.getElementById('sendReceiverId').disabled = true;
         }
     }
 }
 
-
-/* =====================================================
-   RECEBIDOS
-===================================================== */
 
 async function initInboxPage() {
 
@@ -1938,6 +1842,7 @@ async function loadInbox() {
 
         transfers.forEach(
             item => {
+                if (item.status === 'RETURNED') returnedTransferIds.add(item.id);
 
                 const canSign =
                     item.status === "SENT"
@@ -2051,6 +1956,7 @@ async function loadInbox() {
             "Erro ao carregar recebidos:",
             error
         );
+        alert(error.message);
     }
 }
 
@@ -2061,24 +1967,6 @@ async function previewReceivedTransfer(
 ) {
 
     try {
-
-        if (
-            status === "SENT"
-        ) {
-
-            await apiRequest(
-                `/api/transfers/${transferId}/read`,
-                {
-                    method:
-                        "PATCH",
-
-                    headers:
-                        authHeaders(
-                            false
-                        )
-                }
-            );
-        }
 
         await openEmbeddedViewer({
 
@@ -2123,10 +2011,8 @@ async function previewReceivedTransfer(
     }
 }
 
-async function prepareTransferSignature(
-    transferId,
-    documentId
-) {
+async function prepareTransferSignature(transferId, documentId) {
+    if (returnedTransferIds.has(transferId)) return;
 
     try {
 
@@ -2187,9 +2073,24 @@ async function prepareTransferSignature(
    PDF
 ===================================================== */
 
-async function openEmbeddedViewer(
-    config
-) {
+let viewerVersion = 0;
+let viewerObjectUrl = null;
+let viewerPdf = null;
+let signatureInProgress = false;
+const returnedTransferIds = new Set();
+
+function releaseViewer() {
+    if (viewerObjectUrl) URL.revokeObjectURL(viewerObjectUrl);
+    viewerObjectUrl = null;
+    if (viewerPdf) viewerPdf.destroy();
+    viewerPdf = null;
+}
+window.addEventListener('pagehide', releaseViewer);
+
+async function openEmbeddedViewer(config) {
+    if (signatureInProgress) throw new Error('Aguarde a assinatura em andamento.');
+    const version = ++viewerVersion;
+    releaseViewer();
 
     embeddedSignState = {
 
@@ -2298,25 +2199,11 @@ async function openEmbeddedViewer(
             `/api/documents/${config.documentId}/view`;
     }
 
-    const response =
-        await fetch(
-            API + url,
-            {
-                headers:
-                    authHeaders(
-                        false
-                    )
-            }
-        );
-
-    if (!response.ok) {
-
-        throw new Error(
-            await readErrorMessage(
-                response
-            )
-        );
-    }
+    const response = await apiRequest(url, {cache: 'no-store'});
+    if (version !== viewerVersion) return;
+    // Refresh even if rendering fails: the successful view already registered the read.
+    if (config.transferId && document.querySelector('#inboxTable tbody')) await loadInbox();
+    if (version !== viewerVersion) return;
 
     const blob =
         await response.blob();
@@ -2342,16 +2229,17 @@ async function openEmbeddedViewer(
         );
     }
 
-    const buffer =
-        await blob.arrayBuffer();
-
-    const pdf =
-        await pdfjsLib
-            .getDocument({
-                data:
-                    buffer
-            })
-            .promise;
+    if (version !== viewerVersion) return;
+    viewerObjectUrl = URL.createObjectURL(blob);
+    let pdf;
+    try {
+        pdf = await pdfjsLib.getDocument({url: viewerObjectUrl}).promise;
+    } catch (error) {
+        if (version === viewerVersion) releaseViewer();
+        throw error;
+    }
+    if (version !== viewerVersion) { await pdf.destroy(); return; }
+    viewerPdf = pdf;
 
     for (
         let pageNumber = 1;
@@ -2359,6 +2247,7 @@ async function openEmbeddedViewer(
         pageNumber++
     ) {
 
+        if (version !== viewerVersion) return;
         const page =
             await pdf.getPage(
                 pageNumber
@@ -2412,8 +2301,9 @@ async function openEmbeddedViewer(
 
         }).promise;
 
+        if (version !== viewerVersion) return;
         if (
-            config.mode !== "view"
+            config.mode !== "view" && !returnedTransferIds.has(config.transferId)
         ) {
 
             canvas.style.cursor =
@@ -2428,7 +2318,7 @@ async function openEmbeddedViewer(
                         canvas,
                         wrapper,
                         pageNumber,
-                        scale
+                        viewport
                     );
                 }
             );
@@ -2463,8 +2353,9 @@ function handleSignaturePlacement(
     canvas,
     wrapper,
     pageNumber,
-    scale
+    viewport
 ) {
+    if (signatureInProgress || returnedTransferIds.has(embeddedSignState.transferId)) return;
 
     const rect =
         canvas.getBoundingClientRect();
@@ -2493,27 +2384,11 @@ function handleSignaturePlacement(
         *
         scaleY;
 
-    const pdfX =
-        clickXCanvas /
-        scale;
-
-    let pdfY =
-        (
-            canvas.height -
-            clickYCanvas
-        )
-        /
-        scale
-        -
-        72;
-
-    if (
-        pdfY < 0
-    ) {
-
-        pdfY =
-            0;
-    }
+    // PDF.js reverses zoom, page rotation and crop-box transforms.
+    // PDF coordinates use the bottom-left origin; the click anchors the signature.
+    const [pdfX, pdfY] = viewport.convertToPdfPoint(clickXCanvas, clickYCanvas);
+    try { validateSignaturePosition({page: pageNumber, x: pdfX, y: pdfY}); }
+    catch (error) { alert(error.message); return; }
 
     embeddedSignState.page =
         pageNumber;
@@ -2540,6 +2415,9 @@ function handleSignaturePlacement(
 
     preview.className =
         "signature-preview";
+
+    // Align the preview bottom-left with the PDF coordinate selected by the user.
+    preview.style.transform = "translateY(-100%)";
 
     const visibleX =
         event.clientX -
@@ -2616,6 +2494,9 @@ function handleSignaturePlacement(
 ===================================================== */
 
 async function confirmEmbeddedSignature() {
+    if (signatureInProgress || returnedTransferIds.has(embeddedSignState.transferId)) return;
+    try { validateSignaturePosition(embeddedSignState); }
+    catch (error) { alert(error.message); return; }
 
     if (
         embeddedSignState.page === null ||
@@ -2644,6 +2525,7 @@ async function confirmEmbeddedSignature() {
             "Assinando...";
     }
 
+    signatureInProgress = true;
     try {
 
         /* =================================================
@@ -2774,6 +2656,8 @@ async function confirmEmbeddedSignature() {
              * ALTERAÇÃO DO DELAY:
              * atualiza a caixa antes de limpar o PDF.
              */
+            returnedTransferIds.add(transferId);
+
             if (
                 typeof loadInbox ===
                 "function"
@@ -2805,7 +2689,10 @@ async function confirmEmbeddedSignature() {
             "Não foi possível assinar o documento."
         );
 
-        if (button) {
+        if (error.status === 409 && embeddedSignState.transferId) {
+            clearEmbeddedViewer();
+            await loadInbox();
+        } else if (button) {
 
             button.disabled =
                 false;
@@ -2814,6 +2701,7 @@ async function confirmEmbeddedSignature() {
                 "Confirmar Assinatura";
         }
     }
+    finally { signatureInProgress = false; }
 }
 
 
@@ -2822,6 +2710,8 @@ async function confirmEmbeddedSignature() {
 ===================================================== */
 
 function clearEmbeddedViewer() {
+    ++viewerVersion;
+    releaseViewer();
 
     embeddedSignState = {
 
@@ -3254,3 +3144,116 @@ function escapeHtml(
             "&#039;"
         );
 }
+// Reuse an in-flight request when focus, polling and the refresh button overlap.
+let returnedLoadPromise = null;
+function loadReturnedTransfers() {
+    if (returnedLoadPromise) return returnedLoadPromise;
+    returnedLoadPromise = renderReturnedTransfers().finally(() => { returnedLoadPromise = null; });
+    return returnedLoadPromise;
+}
+
+async function renderReturnedTransfers() {
+    const body = document.querySelector('#returnedTable tbody');
+    if (!body) return;
+    const feedback = document.getElementById('returnedListInfo');
+    const button = document.getElementById('refreshReturnedBtn');
+    const token = getToken();
+    if (button) button.disabled = true;
+    const account = currentUser ? (currentUser.name || currentUser.email || currentUser.id) : '';
+    if (feedback) feedback.textContent = 'Consultando devolvidos' + (account ? ' de ' + account : '') + '...';
+    try {
+        const transfers = await apiRequest('/api/transfers/returned', {cache: 'no-store'});
+        if (token !== getToken()) return;
+        if (!Array.isArray(transfers)) throw new Error('Resposta inv?lida de /api/transfers/returned: era esperado um array.');
+        body.replaceChildren();
+        let count = 0;
+        for (const item of transfers) {
+            if (item.status !== 'RETURNED') continue;
+            count++;
+            returnedTransferIds.add(item.id);
+            const row = document.createElement('tr');
+            for (const value of [item.documentTitle, item.receiverName]) {
+                const cell = document.createElement('td');
+                cell.textContent = value || '-';
+                row.appendChild(cell);
+            }
+            const status = document.createElement('td');
+            status.innerHTML = renderStatus(item.status);
+            row.appendChild(status);
+            const action = document.createElement('td');
+            const view = document.createElement('button');
+            view.className = 'btn-secondary small-btn';
+            view.textContent = 'Visualizar';
+            view.addEventListener('click', async () => {
+                view.disabled = true;
+                const info = document.getElementById('returnedViewerInfo');
+                const container = document.getElementById('returnedPdfContainer');
+                try {
+                    container?.scrollIntoView?.({behavior: 'smooth', block: 'start'});
+                    await openEmbeddedViewer({mode: 'view', transferId: item.id,
+                        containerId: 'returnedPdfContainer', infoId: 'returnedViewerInfo',
+                        titleId: 'returnedViewerTitle', buttonId: 'unusedReturnedSign',
+                        titleText: item.documentTitle || 'Documento assinado e devolvido'});
+                    await loadReturnedTransfers();
+                } catch (error) {
+                    if (info) info.textContent = formatRequestFailure(error, '/api/transfers/' + item.id + '/view');
+                    else alert(error.message);
+                } finally { view.disabled = false; }
+            });
+            action.appendChild(view);
+            row.appendChild(action);
+            body.appendChild(row);
+        }
+        if (!count) body.innerHTML = '<tr><td colspan="4">Nenhum documento devolvido para esta conta de remetente.</td></tr>';
+        if (feedback) feedback.textContent = (account ? 'Conta: ' + account + '. ' : '') + count +
+            ' documento(s) assinado(s) e devolvido(s). Atualizado ?s ' + new Date().toLocaleTimeString('pt-BR') + '.';
+    } catch (error) {
+        if (token !== getToken()) return;
+        const message = formatRequestFailure(error, '/api/transfers/returned');
+        if (feedback) feedback.textContent = message;
+        body.replaceChildren();
+        const row = body.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 4;
+        cell.textContent = message;
+    } finally { if (button) button.disabled = false; }
+}
+
+function formatRequestFailure(error, path) {
+    return 'GET ' + API + path + (error.status ? ' ? HTTP ' + error.status : '') + ': ' + error.message;
+}
+
+// Only log transfer response fields; never log request headers or authentication tokens.
+function logTransferResponse(path, response, result) {
+    if (path !== '/api/transfers/returned' && !/^\/api\/transfers\/[^/]+\/view$/.test(path)) return;
+    console.info('[Transferencias]', {
+        url: API + path, method: 'GET', status: response.status,
+        contentType: response.headers.get('Content-Type'), response: result
+    });
+}
+
+function documentSearchPath(title = '', categoryId = '') {
+    const params = new URLSearchParams();
+    if (title.trim()) params.set('title', title.trim());
+    if (categoryId) params.set('categoryId', categoryId);
+    return '/api/documents/search?' + params.toString();
+}
+
+async function initSignPage() {
+    if (!await bootPage()) return;
+    const transferId = new URLSearchParams(window.location.search).get('transferId');
+    if (!transferId) {
+        document.getElementById('viewerInfo').innerText = 'Abra uma transferência pela Caixa de Entrada.';
+        return;
+    }
+    await prepareTransferSignature(transferId, null);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const authError = sessionStorage.getItem('authError');
+    const msg = document.getElementById('msg');
+    if (authError && msg && !getToken()) {
+        msg.innerText = authError;
+        sessionStorage.removeItem('authError');
+    }
+});

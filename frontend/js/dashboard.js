@@ -17,10 +17,13 @@ async function initDashboardPage() {
     }
 
     renderDashboardUser();
+    startReturnedRefresh();
 
     await Promise.all([
         loadDashboardDocuments(),
-        loadDashboardInbox()
+        loadDashboardInbox(),
+        loadReturnedTransfers(),
+        loadCategoriesSelect("searchCategoryId")
     ]);
 }
 
@@ -396,7 +399,9 @@ async function searchDashboardDocuments() {
             .trim();
 
 
-    if (!value) {
+    const categoryId = document.getElementById("searchCategoryId")?.value || "";
+
+    if (!value && !categoryId) {
 
         await loadDashboardDocuments();
 
@@ -408,7 +413,7 @@ async function searchDashboardDocuments() {
 
         const documents =
             await apiRequest(
-                `/api/documents/search?title=${encodeURIComponent(value)}`,
+                documentSearchPath(value, categoryId),
                 {
                     method: "GET",
                     headers:
@@ -442,6 +447,8 @@ async function searchDashboardDocuments() {
 ===================================================== */
 
 async function clearDocumentSearch() {
+    const category = document.getElementById("searchCategoryId");
+    if (category) category.value = "";
 
     const input =
         document.getElementById(
@@ -522,5 +529,36 @@ function showDashboardDocumentsError(
                 )}
             </p>
         `;
+    }
+}
+let returnedRefreshTimer = null;
+let returnedRefreshInstalled = false;
+
+function refreshReturnedIfVisible() {
+    if (document.hidden || !getToken()) return;
+    return loadReturnedTransfers();
+}
+
+function startReturnedRefresh() {
+    if (!returnedRefreshInstalled) {
+        window.addEventListener('focus', refreshReturnedIfVisible);
+        document.addEventListener('visibilitychange', refreshReturnedIfVisible);
+        window.addEventListener('pageshow', event => {
+            if (event.persisted) {
+                startReturnedRefresh();
+                refreshReturnedIfVisible();
+            }
+        });
+        window.addEventListener('pagehide', () => {
+            clearInterval(returnedRefreshTimer);
+            returnedRefreshTimer = null;
+        });
+        window.addEventListener('storage', event => {
+            if (event.key === 'token' || event.key === null) window.location.reload();
+        });
+        returnedRefreshInstalled = true;
+    }
+    if (returnedRefreshTimer === null) {
+        returnedRefreshTimer = setInterval(refreshReturnedIfVisible, 15000);
     }
 }
