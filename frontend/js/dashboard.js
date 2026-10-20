@@ -316,70 +316,29 @@ function renderDashboardDocuments(
    LINHA DA TABELA
 ===================================================== */
 
-function createDashboardDocumentRow(
-    doc
-) {
-
-    const row =
-        document.createElement(
-            "tr"
-        );
-
-
-    const title =
-        escapeHtml(
-            doc.title || "-"
-        );
-
-
-    const filename =
-        escapeHtml(
-            doc.originalFilename || "-"
-        );
-
-
-    row.innerHTML = `
-
-        <td>
-            <div class="table-title">
-                ${title}
-            </div>
-        </td>
-
-        <td>
-            ${filename}
-        </td>
-
-        <td>
-            ${formatDate(
-                doc.createdAt
-            )}
-        </td>
-
-        <td>
-
-            <div class="action-row">
-
-                <button
-                    class="btn-secondary small-btn"
-                    onclick="downloadDocument('${doc.id}')"
-                >
-                    Download
-                </button>
-
-            </div>
-
-        </td>
-    `;
-
-
+function createDashboardDocumentRow(doc) {
+    const row = document.createElement('tr');
+    row.innerHTML = '<td><div class="table-title">' + escapeHtml(doc.title || '-') + '</div></td>' +
+        '<td>' + escapeHtml(doc.originalFilename || '-') + '</td><td>' + formatDate(doc.createdAt) + '</td>';
+    const cell = document.createElement('td');
+    const actions = document.createElement('div');
+    actions.className = 'action-row';
+    const view = document.createElement('button');
+    view.className = 'btn-secondary small-btn';
+    view.textContent = 'Abrir';
+    view.addEventListener('click', () => openMainDocument(doc.id, doc.title));
+    const send = document.createElement('a');
+    send.className = 'btn-secondary small-btn';
+    send.href = 'send.html?documentId=' + encodeURIComponent(doc.id);
+    send.textContent = 'Enviar';
+    const download = document.createElement('button');
+    download.className = 'btn-text small-btn';
+    download.textContent = 'Baixar';
+    download.addEventListener('click', () => downloadDocument(doc.id));
+    actions.appendChild(view); actions.appendChild(send); actions.appendChild(download);
+    cell.appendChild(actions); row.appendChild(cell);
     return row;
 }
-
-
-/* =====================================================
-   PESQUISA
-===================================================== */
 
 async function searchDashboardDocuments() {
 

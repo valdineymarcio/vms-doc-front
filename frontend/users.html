@@ -1,682 +1,182 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>
-
+  <head>
     <meta charset="UTF-8">
-
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Usuários - VMS Docs
-    </title>
-
-    <link
-            rel="stylesheet"
-            href="css/style.css"
-    >
-
-</head>
-
-
-<body onload="initUsersPage()">
-
-<div class="bg-grid"></div>
-
-
-<div class="layout">
-
-    <!-- =========================================
-         SIDEBAR
-    ========================================== -->
-
-    <aside class="sidebar glass-card">
-
-        <div class="sidebar-brand">
-
-            <div class="brand-badge small">
-                VMS
-            </div>
-
-            <div>
-
-                <h2>
-                    VMS Docs
-                </h2>
-
-                <p>
-                    Gestão de documentos
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- INÍCIO -->
-
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Usuários · VMS Docs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
+  </head>
+  <body class="workspace-page" onload="runPage('initUsersPage')">
+    <a class="skip-link" href="#mainContent">Ir para o conteúdo</a>
+    <div class="mobile-bar">
+      <a href="dashboard.html" class="mobile-brand">VMS Docs</a>
+      <button type="button" class="btn-secondary" id="navigationToggle" aria-expanded="false" aria-controls="appNavigation">Menu</button>
+    </div>
+    <div class="layout">
+      <aside class="sidebar glass-card" id="appNavigation" aria-label="Navegação principal">
+        <a class="sidebar-brand" href="dashboard.html">
+          <span class="brand-badge small">V</span>
+          <span>
+            <strong>VMS Docs</strong>
+            <small>Gestão de documentos</small>
+          </span>
+        </a>
         <div class="sidebar-section">
-
-            <p class="sidebar-title">
-                Início
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a href="dashboard.html">
-                    Dashboard
-                </a>
-
-            </nav>
-
+          <p class="sidebar-title">Área de trabalho</p>
+          <nav class="sidebar-nav">
+            <a href="dashboard.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 10 9-7 9 7v10H3Z"/>
+                <path d="M9 20v-8h6v8"/>
+              </svg>
+              <span>Visão geral</span>
+            </a>
+            <a href="inbox.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16l2 12v4H2v-4Z"/>
+                <path d="M2 15h6l2 3h4l2-3h6M12 5v7m-3-3 3 3 3-3"/>
+              </svg>
+              <span>Recebidos</span>
+            </a>
+            <a href="dashboard.html#returnedDocuments">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 4 4L19 6"/>
+              </svg>
+              <span>Devolvidos</span>
+            </a>
+            <a href="send.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m22 2-7 20-4-9L2 9Z"/>
+                <path d="M22 2 11 13"/>
+              </svg>
+              <span>Enviar documento</span>
+            </a>
+            <a href="folders.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 6h8l2 2h10v12H2Z"/>
+              </svg>
+              <span>Pastas</span>
+            </a>
+          </nav>
         </div>
-
-
-        <!-- DOCUMENTOS -->
-
-        <div class="sidebar-section">
-
-            <p class="sidebar-title">
-                Documentos
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a href="dashboard.html">
-                    Meus Documentos
-                </a>
-
-                <a href="upload.html">
-                    Novo Documento
-                </a>
-
-                <a href="inbox.html">
-                    Recebidos
-                </a>
-
-                <a href="send.html">
-                    Enviar para Usuário
-                </a>
-
-                <a href="folders.html">
-                    Pastas
-                </a>
-
-            </nav>
-
+        <div class="sidebar-section" data-admin-only>
+          <p class="sidebar-title">Administração</p>
+          <nav class="sidebar-nav">
+            <a href="categories.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+              <span>Categorias</span>
+            </a>
+            <a href="users.html" class="active" aria-current="page">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="8" r="3"/>
+                <path d="M2 21v-3a7 7 0 0 1 14 0v3M17 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/>
+              </svg>
+              <span>Usuários</span>
+            </a>
+            <a href="audit.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 3h14v18H5Z M8 7h8M8 12h8M8 17h5"/>
+              </svg>
+              <span>Auditoria</span>
+            </a>
+          </nav>
         </div>
-
-
-        <!-- ADMINISTRAÇÃO -->
-
-        <div
-                class="sidebar-section"
-                data-admin-only
-        >
-
-            <p class="sidebar-title">
-                Administração
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a href="categories.html">
-                    Categorias
-                </a>
-
-                <a
-                        href="users.html"
-                        class="active"
-                >
-                    Usuários
-                </a>
-
-                <a href="audit.html">
-                    Auditoria
-                </a>
-
-            </nav>
-
+        <div class="sidebar-section account-section" style="margin-top: auto;">
+          <p id="accountName" class="account-name">Minha conta</p>
+          <nav class="sidebar-nav">
+            <a href="index.html" onclick="logout(); return false;">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3H3v18h6M9 12h13m-4-4 4 4-4 4"/>
+              </svg>
+              <span>Sair</span>
+            </a>
+          </nav>
         </div>
-
-
-        <!-- CONTA -->
-
-        <div
-                class="sidebar-section"
-                style="margin-top: auto;"
-        >
-
-            <p class="sidebar-title">
-                Conta
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a
-                        href="#"
-                        onclick="logout(); return false;"
-                >
-                    Sair
-                </a>
-
-            </nav>
-
+      </aside>
+      <main class="content" id="mainContent">
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">ÁREA DE TRABALHO</p>
+            <h1>Usuários</h1>
+            <p>Gerencie quem pode acessar e receber documentos.</p>
+          </div>
+        </header>
+        <div class="management-grid">
+          <form class="glass-card" id="userForm" onsubmit="event.preventDefault(); submitUserForm(this)">
+            <h2 class="section-title">Novo usuário</h2>
+            <div class="form-group">
+              <label for="userName">Nome <span class="required">*</span>
+              </label>
+              <input id="userName" required autocomplete="name" placeholder="Nome completo">
+            </div>
+            <div class="form-group">
+              <label for="userEmail">E-mail <span class="required">*</span>
+              </label>
+              <input id="userEmail" type="email" required autocomplete="email" placeholder="nome@empresa.com">
+            </div>
+            <div class="form-group">
+              <label for="userPassword">Senha inicial <span class="required">*</span>
+              </label>
+              <input id="userPassword" type="password" required minlength="6" autocomplete="new-password" placeholder="Pelo menos 6 caracteres">
+            </div>
+            <div class="form-group">
+              <label for="userRole">Perfil <span class="required">*</span>
+              </label>
+              <select id="userRole" required>
+                <option value="USER">Usuário</option>
+                <option value="ADMIN">Administrador</option>
+              </select>
+            </div>
+            <p class="field-hint">Administradores também gerenciam usuários, categorias e auditoria.</p>
+            <p id="userMsg" class="form-message" role="status"></p>
+            <footer class="form-footer">
+              <button type="button" class="btn-text" onclick="clearUserForm()">Limpar</button>
+              <button type="submit" class="btn-primary">Criar usuário</button>
+            </footer>
+          </form>
+          <section class="glass-card">
+            <h2 class="section-title">Pessoas com acesso</h2>
+            <div class="table-wrapper" id="usersTableWrapper">
+              <table class="modern-table" id="usersTable">
+                <thead>
+                  <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">Perfil</th>
+                    <th scope="col">Situação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="4" class="loading-cell">Carregando…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="usersEmptyState" style="display:none">
+              <span class="empty-icon">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H5v20h14V7Z"/>
+                  <path d="M14 2v6h5M8 13h8M8 17h6"/>
+                </svg>
+              </span>
+              <h3>Nenhum usuário encontrado</h3>
+              <p>Os usuários cadastrados aparecem aqui.</p>
+            </div>
+          </section>
         </div>
-
-    </aside>
-
-
-    <!-- =========================================
-         CONTEÚDO
-    ========================================== -->
-
-    <main class="content">
-
-
-        <!-- CABEÇALHO -->
-
-        <section class="topbar glass-card">
-
-            <div>
-
-                <h1>
-                    Usuários
-                </h1>
-
-                <p>
-                    Cadastre e consulte as pessoas
-                    que possuem acesso ao VMS Docs.
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- ORIENTAÇÃO -->
-
-        <section class="info-box">
-
-            <strong>
-                Gestão de usuários
-            </strong>
-
-            <br><br>
-
-            Apenas administradores podem acessar esta área.
-
-            <br><br>
-
-            Aqui você pode cadastrar novas contas
-            e definir o nível de acesso de cada usuário.
-
-        </section>
-
-
-        <!-- =========================================
-             TIPOS DE ACESSO
-        ========================================== -->
-
-        <section class="grid-2">
-
-            <div class="glass-card">
-
-                <div class="section-header">
-
-                    <div>
-
-                        <h2 class="section-title">
-                            Administrador
-                        </h2>
-
-                        <p class="section-description">
-                            Acesso completo ao sistema.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="info-box">
-
-                    O perfil
-                    <strong>ADMIN</strong>
-                    pode gerenciar documentos,
-                    categorias, usuários e consultar
-                    os registros de auditoria.
-
-                </div>
-
-            </div>
-
-
-            <div class="glass-card">
-
-                <div class="section-header">
-
-                    <div>
-
-                        <h2 class="section-title">
-                            Usuário
-                        </h2>
-
-                        <p class="section-description">
-                            Acesso às funções operacionais.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="success-box">
-
-                    O perfil
-                    <strong>USER</strong>
-                    pode cadastrar documentos,
-                    receber, visualizar,
-                    encaminhar e assinar arquivos.
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================================
-             NOVO USUÁRIO
-        ========================================== -->
-
-        <section class="glass-card">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2 class="section-title">
-                        Novo Usuário
-                    </h2>
-
-                    <p class="section-description">
-                        Preencha os dados para criar
-                        uma nova conta de acesso.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="grid-2">
-
-
-                <!-- NOME -->
-
-                <div class="form-group">
-
-                    <label for="userName">
-                        Nome completo
-                    </label>
-
-                    <input
-                            type="text"
-                            id="userName"
-                            placeholder="Ex.: João da Silva"
-                    >
-
-                    <p class="muted-text">
-                        Informe o nome que será exibido
-                        no sistema e nas assinaturas.
-                    </p>
-
-                </div>
-
-
-                <!-- EMAIL -->
-
-                <div class="form-group">
-
-                    <label for="userEmail">
-                        E-mail
-                    </label>
-
-                    <input
-                            type="email"
-                            id="userEmail"
-                            placeholder="Ex.: joao@empresa.com"
-                    >
-
-                    <p class="muted-text">
-                        Este e-mail será utilizado
-                        para entrar no sistema.
-                    </p>
-
-                </div>
-
-
-                <!-- SENHA -->
-
-                <div class="form-group">
-
-                    <label for="userPassword">
-                        Senha inicial
-                    </label>
-
-                    <input
-                            type="password"
-                            id="userPassword"
-                            placeholder="Digite uma senha"
-                    >
-
-                    <p class="muted-text">
-                        O usuário utilizará esta senha
-                        no primeiro acesso.
-                    </p>
-
-                </div>
-
-
-                <!-- PERFIL -->
-
-                <div class="form-group">
-
-                    <label for="userRole">
-                        Perfil de acesso
-                    </label>
-
-                    <select id="userRole">
-
-                        <option value="">
-                            Selecione um perfil
-                        </option>
-
-                        <option value="USER">
-                            Usuário
-                        </option>
-
-                        <option value="ADMIN">
-                            Administrador
-                        </option>
-
-                    </select>
-
-                    <p class="muted-text">
-                        Escolha com atenção o nível
-                        de permissão da conta.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- MENSAGEM -->
-
-            <div
-                    id="userMsg"
-                    class="form-message"
-            ></div>
-
-
-            <!-- BOTÕES -->
-
-            <div
-                    class="action-row"
-                    style="
-                        margin-top: 24px;
-                        justify-content: flex-end;
-                    "
-            >
-
-                <button
-                        class="btn-secondary"
-                        onclick="clearUserForm()"
-                >
-                    Limpar
-                </button>
-
-
-                <button
-                        class="btn-primary"
-                        onclick="createUser()"
-                >
-                    Cadastrar Usuário
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================================
-             USUÁRIOS CADASTRADOS
-        ========================================== -->
-
-        <section class="glass-card">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2 class="section-title">
-                        Usuários Cadastrados
-                    </h2>
-
-                    <p class="section-description">
-                        Consulte as contas disponíveis
-                        no sistema.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div
-                    class="table-wrapper"
-                    id="usersTableWrapper"
-            >
-
-                <table
-                        class="modern-table"
-                        id="usersTable"
-                >
-
-                    <thead>
-
-                    <tr>
-
-                        <th>
-                            Nome
-                        </th>
-
-                        <th>
-                            E-mail
-                        </th>
-
-                        <th>
-                            Perfil
-                        </th>
-
-                        <th>
-                            Situação
-                        </th>
-
-                    </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                    <!-- preenchido pelo api.js -->
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- ESTADO VAZIO -->
-
-            <div
-                    id="usersEmptyState"
-                    class="empty-state"
-                    style="
-                        display: none;
-                        margin-top: 20px;
-                    "
-            >
-
-                <div class="empty-state-icon">
-                    👤
-                </div>
-
-                <h3>
-                    Nenhum usuário encontrado
-                </h3>
-
-                <p>
-                    Cadastre uma nova conta para
-                    começar a utilizar o sistema.
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================================
-             EXPLICAÇÃO
-        ========================================== -->
-
-        <section class="glass-card">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2 class="section-title">
-                        Situação da conta
-                    </h2>
-
-                    <p class="section-description">
-                        Entenda como identificar
-                        o estado de um usuário.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="grid-2">
-
-
-                <div class="success-box">
-
-                    <strong>
-                        Ativo
-                    </strong>
-
-                    <br><br>
-
-                    O usuário pode entrar no sistema
-                    e utilizar as funcionalidades
-                    permitidas pelo seu perfil.
-
-                </div>
-
-
-                <div class="warning-box">
-
-                    <strong>
-                        Inativo
-                    </strong>
-
-                    <br><br>
-
-                    A conta permanece cadastrada,
-                    mas não deve ser utilizada
-                    para acesso ao sistema.
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-</div>
-
-
-<script src="js/api.js"></script>
-
-
-<script>
-
-    function clearUserForm() {
-
-        const name =
-            document.getElementById(
-                "userName"
-            );
-
-        const email =
-            document.getElementById(
-                "userEmail"
-            );
-
-        const password =
-            document.getElementById(
-                "userPassword"
-            );
-
-        const role =
-            document.getElementById(
-                "userRole"
-            );
-
-        const msg =
-            document.getElementById(
-                "userMsg"
-            );
-
-
-        if (name) {
-            name.value = "";
-        }
-
-        if (email) {
-            email.value = "";
-        }
-
-        if (password) {
-            password.value = "";
-        }
-
-        if (role) {
-            role.value = "";
-        }
-
-        if (msg) {
-            msg.innerText = "";
-        }
-    }
-
-</script>
-
-
-</body>
-
+      </main>
+    </div>
+    <div id="appToast" class="app-toast" role="status" aria-live="polite" hidden>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+  </body>
 </html>

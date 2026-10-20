@@ -1,720 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>
-
+  <head>
     <meta charset="UTF-8">
-
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Novo Documento - VMS Docs
-    </title>
-
-    <link
-            rel="stylesheet"
-            href="css/style.css"
-    >
-
-</head>
-
-
-<body onload="initUploadPage()">
-
-<div class="bg-grid"></div>
-
-
-<div class="layout">
-
-    <!-- =========================================
-         SIDEBAR
-    ========================================== -->
-
-    <aside class="sidebar glass-card">
-
-        <div class="sidebar-brand">
-
-            <div class="brand-badge small">
-                VMS
-            </div>
-
-            <div>
-
-                <h2>
-                    VMS Docs
-                </h2>
-
-                <p>
-                    Gestão de documentos
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- INÍCIO -->
-
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Novo documento · VMS Docs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
+  </head>
+  <body class="workspace-page" onload="runPage('initUploadPage')">
+    <a class="skip-link" href="#mainContent">Ir para o conteúdo</a>
+    <div class="mobile-bar">
+      <a href="dashboard.html" class="mobile-brand">VMS Docs</a>
+      <button type="button" class="btn-secondary" id="navigationToggle" aria-expanded="false" aria-controls="appNavigation">Menu</button>
+    </div>
+    <div class="layout">
+      <aside class="sidebar glass-card" id="appNavigation" aria-label="Navegação principal">
+        <a class="sidebar-brand" href="dashboard.html">
+          <span class="brand-badge small">V</span>
+          <span>
+            <strong>VMS Docs</strong>
+            <small>Gestão de documentos</small>
+          </span>
+        </a>
         <div class="sidebar-section">
-
-            <p class="sidebar-title">
-                Início
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a href="dashboard.html">
-                    Dashboard
-                </a>
-
-            </nav>
-
+          <p class="sidebar-title">Área de trabalho</p>
+          <nav class="sidebar-nav">
+            <a href="dashboard.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 10 9-7 9 7v10H3Z"/>
+                <path d="M9 20v-8h6v8"/>
+              </svg>
+              <span>Visão geral</span>
+            </a>
+            <a href="inbox.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16l2 12v4H2v-4Z"/>
+                <path d="M2 15h6l2 3h4l2-3h6M12 5v7m-3-3 3 3 3-3"/>
+              </svg>
+              <span>Recebidos</span>
+            </a>
+            <a href="dashboard.html#returnedDocuments">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m5 12 4 4L19 6"/>
+              </svg>
+              <span>Devolvidos</span>
+            </a>
+            <a href="send.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m22 2-7 20-4-9L2 9Z"/>
+                <path d="M22 2 11 13"/>
+              </svg>
+              <span>Enviar documento</span>
+            </a>
+            <a href="folders.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 6h8l2 2h10v12H2Z"/>
+              </svg>
+              <span>Pastas</span>
+            </a>
+          </nav>
         </div>
-
-
-        <!-- DOCUMENTOS -->
-
-        <div class="sidebar-section">
-
-            <p class="sidebar-title">
-                Documentos
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a href="dashboard.html">
-                    Meus Documentos
-                </a>
-
-                <a
-                        href="upload.html"
-                        class="active"
-                >
-                    Novo Documento
-                </a>
-
-                <a href="inbox.html">
-                    Recebidos
-                </a>
-
-                <a href="send.html">
-                    Enviar para Usuário
-                </a>
-
-                <a href="folders.html">
-                    Pastas
-                </a>
-
-            </nav>
-
+        <div class="sidebar-section" data-admin-only>
+          <p class="sidebar-title">Administração</p>
+          <nav class="sidebar-nav">
+            <a href="categories.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+              <span>Categorias</span>
+            </a>
+            <a href="users.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="8" r="3"/>
+                <path d="M2 21v-3a7 7 0 0 1 14 0v3M17 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/>
+              </svg>
+              <span>Usuários</span>
+            </a>
+            <a href="audit.html">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 3h14v18H5Z M8 7h8M8 12h8M8 17h5"/>
+              </svg>
+              <span>Auditoria</span>
+            </a>
+          </nav>
         </div>
-
-
-        <!-- ADMINISTRAÇÃO -->
-
-        <div
-                class="sidebar-section"
-                data-admin-only
-        >
-
-            <p class="sidebar-title">
-                Administração
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a href="categories.html">
-                    Categorias
-                </a>
-
-                <a href="users.html">
-                    Usuários
-                </a>
-
-                <a href="audit.html">
-                    Auditoria
-                </a>
-
-            </nav>
-
+        <div class="sidebar-section account-section" style="margin-top: auto;">
+          <p id="accountName" class="account-name">Minha conta</p>
+          <nav class="sidebar-nav">
+            <a href="index.html" onclick="logout(); return false;">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3H3v18h6M9 12h13m-4-4 4 4-4 4"/>
+              </svg>
+              <span>Sair</span>
+            </a>
+          </nav>
         </div>
-
-
-        <!-- CONTA -->
-
-        <div
-                class="sidebar-section"
-                style="margin-top: auto;"
-        >
-
-            <p class="sidebar-title">
-                Conta
-            </p>
-
-            <nav class="sidebar-nav">
-
-                <a
-                        href="#"
-                        onclick="logout(); return false;"
-                >
-                    Sair
-                </a>
-
-            </nav>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =========================================
-         CONTEÚDO
-    ========================================== -->
-
-    <main class="content">
-
-
-        <!-- CABEÇALHO -->
-
-        <section class="topbar glass-card">
-
+      </aside>
+      <main class="content" id="mainContent">
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">ÁREA DE TRABALHO</p>
+            <h1>Novo documento</h1>
+            <p>Adicione um arquivo à sua biblioteca.</p>
+          </div>
+          <div class="header-actions">
+            <a href="dashboard.html" class="btn-secondary">Voltar aos documentos</a>
+          </div>
+        </header>
+        <form id="uploadForm" class="glass-card form-card" onsubmit="event.preventDefault(); uploadDocument()">
+          <div class="section-header">
             <div>
-
-                <h1>
-                    Novo Documento
-                </h1>
-
-                <p>
-                    Cadastre um arquivo no sistema para
-                    organizar, encaminhar ou assinar posteriormente.
-                </p>
-
+              <h2 class="section-title">Informações do documento</h2>
+              <p class="section-description">Depois de salvar, você pode enviá-lo para outra pessoa.</p>
             </div>
-
-        </section>
-
-
-        <!-- ORIENTAÇÃO -->
-
-        <section class="info-box">
-
-            <strong>
-                O que acontece nesta tela?
-            </strong>
-
-            <br><br>
-
-            Aqui você apenas adiciona um documento ao VMS Docs.
-            Depois de cadastrado, ele aparecerá em
-            <strong>Meus Documentos</strong> e poderá ser
-            enviado para outro usuário ou assinado.
-
-        </section>
-
-
-        <!-- ETAPAS -->
-
-        <section class="steps">
-
-            <div class="step">
-
-                <div class="step-number">
-                    1
-                </div>
-
-                <div>
-
-                    <strong>
-                        Informe os dados
-                    </strong>
-
-                    <span>
-                        Título e descrição
-                    </span>
-
-                </div>
-
+          </div>
+          <div class="form-group">
+            <label for="title">Título <span class="required">*</span>
+            </label>
+            <input id="title" required placeholder="Ex.: Contrato de prestação de serviços">
+          </div>
+          <div class="form-group">
+            <label for="description">Descrição <span class="optional">Opcional</span>
+            </label>
+            <textarea id="description" rows="3" placeholder="Uma breve descrição para facilitar a consulta">
+            </textarea>
+          </div>
+          <div class="form-group">
+            <label for="categoryId">Categoria <span class="optional">Opcional</span>
+            </label>
+            <select id="categoryId">
+              <option value="">Sem categoria</option>
+            </select>
+          </div>
+          <div class="file-field">
+            <label for="file">Arquivo <span class="required">*</span>
+            </label>
+            <input type="file" id="file" required aria-describedby="fileHint">
+            <p id="fileHint" class="field-hint">Para coletar assinaturas, selecione um arquivo PDF.</p>
+            <div id="selectedFileInfo" class="selected-file" style="display:none">
+              <strong id="selectedFileName">
+              </strong>
+              <span id="selectedFileSize">
+              </span>
             </div>
-
-
-            <div class="step">
-
-                <div class="step-number">
-                    2
-                </div>
-
-                <div>
-
-                    <strong>
-                        Escolha a categoria
-                    </strong>
-
-                    <span>
-                        Organize o documento
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="step">
-
-                <div class="step-number">
-                    3
-                </div>
-
-                <div>
-
-                    <strong>
-                        Selecione o arquivo
-                    </strong>
-
-                    <span>
-                        Escolha no computador
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="step">
-
-                <div class="step-number">
-                    4
-                </div>
-
-                <div>
-
-                    <strong>
-                        Salve no sistema
-                    </strong>
-
-                    <span>
-                        Finalize o cadastro
-                    </span>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- FORMULÁRIO -->
-
-        <section class="glass-card">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2 class="section-title">
-                        Dados do Documento
-                    </h2>
-
-                    <p class="section-description">
-                        Preencha as informações abaixo
-                        para cadastrar o arquivo.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="grid-2">
-
-
-                <!-- COLUNA ESQUERDA -->
-
-                <div>
-
-
-                    <div class="form-group">
-
-                        <label for="title">
-                            Título do documento
-                        </label>
-
-                        <input
-                                type="text"
-                                id="title"
-                                placeholder="Ex.: Ofício nº 025/2026"
-                        >
-
-                        <p class="muted-text">
-                            Use um título fácil de identificar.
-                        </p>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="description">
-                            Descrição
-                        </label>
-
-                        <textarea
-                                id="description"
-                                placeholder="Descreva brevemente o conteúdo ou finalidade do documento."
-                        ></textarea>
-
-                        <p class="muted-text">
-                            Campo opcional, mas ajuda na organização.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- COLUNA DIREITA -->
-
-                <div>
-
-
-                    <div class="form-group">
-
-                        <label for="categoryId">
-                            Categoria
-                        </label>
-
-                        <select id="categoryId">
-
-                            <option value="">
-                                Carregando categorias...
-                            </option>
-
-                        </select>
-
-                        <p class="muted-text">
-                            A categoria define em qual pasta
-                            o documento será organizado.
-                        </p>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="file">
-                            Arquivo
-                        </label>
-
-                        <input
-                                type="file"
-                                id="file"
-                        >
-
-                        <p class="muted-text">
-                            Selecione o arquivo que deseja
-                            armazenar no sistema.
-                        </p>
-
-                    </div>
-
-
-                    <!-- ARQUIVO SELECIONADO -->
-
-                    <div
-                            id="selectedFileInfo"
-                            class="info-box"
-                            style="display: none;"
-                    >
-
-                        <strong>
-                            Arquivo selecionado
-                        </strong>
-
-                        <br><br>
-
-                        <span id="selectedFileName">
-                            -
-                        </span>
-
-                        <br>
-
-                        <span
-                                id="selectedFileSize"
-                                class="muted-text"
-                        >
-                            -
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- MENSAGEM -->
-
-            <div
-                    id="msg"
-                    class="form-message"
-            ></div>
-
-
-            <!-- BOTÕES -->
-
-            <div
-                    class="action-row"
-                    style="
-                        margin-top: 24px;
-                        justify-content: flex-end;
-                    "
-            >
-
-                <button
-                        class="btn-secondary"
-                        onclick="clearUploadForm()"
-                >
-                    Limpar
-                </button>
-
-
-                <button
-                        id="uploadButton"
-                        class="btn-primary"
-                        onclick="uploadDocument()"
-                >
-                    Salvar Documento
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- PRÓXIMO PASSO -->
-
-        <section class="glass-card">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2 class="section-title">
-                        Depois de cadastrar
-                    </h2>
-
-                    <p class="section-description">
-                        O documento ficará disponível para
-                        outras ações dentro do sistema.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="quick-actions">
-
-
-                <a
-                        href="dashboard.html"
-                        class="quick-action"
-                >
-
-                    <div class="quick-action-icon">
-                        📄
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Meus Documentos
-                        </strong>
-
-                        <span>
-                            Consulte os arquivos cadastrados
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-                <a
-                        href="send.html"
-                        class="quick-action"
-                >
-
-                    <div class="quick-action-icon">
-                        →
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Enviar para Usuário
-                        </strong>
-
-                        <span>
-                            Encaminhe o documento para outra pessoa
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-                <a
-                        href="folders.html"
-                        class="quick-action"
-                >
-
-                    <div class="quick-action-icon">
-                        📁
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            Pastas
-                        </strong>
-
-                        <span>
-                            Consulte documentos por categoria
-                        </span>
-
-                    </div>
-
-                </a>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-</div>
-
-
-<script src="js/api.js"></script>
-
-
-<script>
-
-    /*
-     * Mostra informações do arquivo
-     * assim que o usuário selecionar.
-     */
-
-    document
-        .getElementById("file")
-        .addEventListener(
-            "change",
-            function () {
-
-                const file =
-                    this.files[0];
-
-                const info =
-                    document.getElementById(
-                        "selectedFileInfo"
-                    );
-
-                const name =
-                    document.getElementById(
-                        "selectedFileName"
-                    );
-
-                const size =
-                    document.getElementById(
-                        "selectedFileSize"
-                    );
-
-
-                if (!file) {
-
-                    info.style.display =
-                        "none";
-
-                    return;
-                }
-
-
-                name.innerText =
-                    file.name;
-
-
-                const sizeKB =
-                    file.size / 1024;
-
-
-                if (sizeKB < 1024) {
-
-                    size.innerText =
-                        `${sizeKB.toFixed(1)} KB`;
-
-                } else {
-
-                    const sizeMB =
-                        sizeKB / 1024;
-
-                    size.innerText =
-                        `${sizeMB.toFixed(2)} MB`;
-                }
-
-
-                info.style.display =
-                    "block";
-            }
-        );
-
-
-    /*
-     * Limpa o formulário.
-     */
-
-    function clearUploadForm() {
-
-        document
-            .getElementById("title")
-            .value =
-            "";
-
-        document
-            .getElementById("description")
-            .value =
-            "";
-
-        document
-            .getElementById("categoryId")
-            .value =
-            "";
-
-        document
-            .getElementById("file")
-            .value =
-            "";
-
-        document
-            .getElementById("msg")
-            .innerText =
-            "";
-
-        document
-            .getElementById(
-                "selectedFileInfo"
-            )
-            .style
-            .display =
-            "none";
-    }
-
-</script>
-
-
-</body>
-
+          </div>
+          <p id="msg" class="form-message" role="status" aria-live="polite"></p>
+          <div id="uploadNextActions" class="success-actions" hidden>
+            <a class="btn-primary" id="sendUploadedDocument" href="send.html">Enviar este documento</a>
+            <a class="btn-secondary" href="dashboard.html">Ver meus documentos</a>
+          </div>
+          <footer class="form-footer">
+            <button type="button" class="btn-text" onclick="clearUploadForm()">Limpar</button>
+            <button type="submit" class="btn-primary" id="uploadButton">Salvar documento</button>
+          </footer>
+        </form>
+      </main>
+    </div>
+    <div id="appToast" class="app-toast" role="status" aria-live="polite" hidden>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+  </body>
 </html>

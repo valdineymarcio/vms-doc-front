@@ -1,190 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>
-
+  <head>
     <meta charset="UTF-8">
-
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Login - VMS Docs
-    </title>
-
-    <link
-            rel="stylesheet"
-            href="css/style.css"
-    >
-
-</head>
-
-
-<body>
-
-<div class="bg-grid"></div>
-
-
-<div class="auth-wrapper">
-
-    <section class="auth-card glass-card">
-
-
-        <!-- =========================================
-             MARCA
-        ========================================== -->
-
-        <div class="brand-block">
-
-            <div class="brand-badge">
-                VMS
-            </div>
-
-            <h1>
-                VMS Docs
-            </h1>
-
-            <p>
-                Sistema de Gestão e Assinatura de Documentos
-            </p>
-
-        </div>
-
-
-        <!-- =========================================
-             APRESENTAÇÃO
-        ========================================== -->
-
-        <div
-                class="info-box"
-                style="margin-bottom: 24px;"
-        >
-
-            <strong>
-                Bem-vindo
-            </strong>
-
-            <br><br>
-
-            Acesse sua conta para gerenciar,
-            organizar, enviar e assinar documentos.
-
-        </div>
-
-
-        <!-- =========================================
-             LOGIN
-        ========================================== -->
-
-        <div class="form-group">
-
-            <label for="email">
-                E-mail
-            </label>
-
-            <input
-                    type="email"
-                    id="email"
-                    placeholder="Digite seu e-mail"
-                    autocomplete="email"
-            >
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label for="password">
-                Senha
-            </label>
-
-            <input
-                    type="password"
-                    id="password"
-                    placeholder="Digite sua senha"
-                    autocomplete="current-password"
-            >
-
-        </div>
-
-
-        <!-- MENSAGEM -->
-
-        <div
-                id="msg"
-                class="form-message"
-        ></div>
-
-
-        <!-- BOTÃO -->
-
-        <button
-                class="btn-primary full"
-                onclick="login()"
-        >
-            Entrar
-        </button>
-
-
-        <!-- =========================================
-             INFORMAÇÕES
-        ========================================== -->
-
-        <div
-                style="
-                    margin-top: 26px;
-                    padding-top: 20px;
-                    border-top: 1px solid var(--border);
-                "
-        >
-
-            <p
-                    class="muted-text"
-                    style="
-                        margin: 0;
-                        text-align: center;
-                        line-height: 1.6;
-                    "
-            >
-                Utilize o e-mail e a senha
-                cadastrados pelo administrador.
-            </p>
-
-        </div>
-
-
-    </section>
-
-</div>
-
-
-<script src="js/api.js"></script>
-
-
-<script>
-
-    /*
-     * Permite entrar pressionando ENTER.
-     */
-
-    document.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                login();
-            }
-        }
-    );
-
-</script>
-
-
-</body>
-
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Entrar · VMS Docs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
+  </head>
+  <body class="auth-page">
+    <main class="auth-layout">
+      <section class="auth-card glass-card">
+        <a class="auth-brand" href="index.html">
+          <span class="brand-badge small">V</span>VMS Docs</a>
+        <p class="eyebrow">BEM-VINDO DE VOLTA</p>
+        <h1>Acesse seus documentos</h1>
+        <p class="auth-description">Envie, acompanhe e assine em um só lugar.</p>
+        <form onsubmit="event.preventDefault(); login()">
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" required autocomplete="username" placeholder="nome@empresa.com">
+          </div>
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Sua senha">
+          </div>
+          <p id="msg" class="form-message" role="status" aria-live="polite"></p>
+          <button type="submit" class="btn-primary full">Entrar</button>
+        </form>
+        <p class="auth-footnote">Use os dados de acesso fornecidos pelo administrador.</p>
+      </section>
+      <p class="auth-caption">VMS Docs · Gestão de documentos</p>
+    </main>
+    <script src="js/api.js"></script>
+  </body>
 </html>

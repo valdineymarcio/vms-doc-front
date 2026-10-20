@@ -16,9 +16,9 @@ function applySavedTheme() {
         );
 
     const theme =
-        savedTheme === "light"
-            ? "light"
-            : "dark";
+        savedTheme === "dark"
+            ? "dark"
+            : "light";
 
     document
         .documentElement
@@ -687,6 +687,8 @@ async function bootPage(
         }
 
         applyRoleVisibility();
+        const accountLabel = document.getElementById("accountName");
+        if (accountLabel) accountLabel.textContent = currentUser.name || currentUser.email || "Minha conta";
 
         return true;
 
@@ -900,6 +902,8 @@ async function initUploadPage() {
 }
 
 async function uploadDocument() {
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm?.dataset.busy) return;
 
     const title =
         document.getElementById(
@@ -948,6 +952,9 @@ async function uploadDocument() {
         return;
     }
 
+    const uploadButton = document.getElementById('uploadButton');
+    if (uploadForm) uploadForm.dataset.busy = 'true';
+    if (uploadButton) { uploadButton.disabled = true; uploadButton.innerText = 'Salvando…'; }
     try {
 
         const form =
@@ -988,7 +995,7 @@ async function uploadDocument() {
                 "Bearer " + token;
         }
 
-        await apiRequest(
+        const savedDocument = await apiRequest(
             "/api/documents",
             {
                 method:
@@ -1006,6 +1013,7 @@ async function uploadDocument() {
             msg.innerText =
                 "Documento salvo com sucesso.";
         }
+        if (typeof onDocumentUploaded === 'function') onDocumentUploaded(savedDocument);
 
     } catch (error) {
 
@@ -1014,6 +1022,10 @@ async function uploadDocument() {
             msg.innerText =
                 error.message;
         }
+    }
+    finally {
+        if (uploadForm) delete uploadForm.dataset.busy;
+        if (uploadButton) { uploadButton.disabled = false; uploadButton.innerText = 'Salvar documento'; }
     }
 }
 
@@ -1064,6 +1076,8 @@ async function loadCategories() {
 
     tbody.innerHTML =
         "";
+
+    updateCollectionVisibility('categoriesTable', 'categoriesEmptyState', data.length);
 
     data.forEach(
         category => {
@@ -1240,6 +1254,8 @@ async function loadUsers() {
 
     tbody.innerHTML =
         "";
+
+    updateCollectionVisibility('usersTable', 'usersEmptyState', users.length);
 
     users.forEach(
         user => {
@@ -1487,9 +1503,10 @@ async function initSendPage() {
     ]);
 
     const documentSelect =
-        document.getElementById(
-            "sendDocumentId"
-        );
+        document.getElementById("sendDocumentId");
+    const selectedDocument = new URLSearchParams(window.location.search).get('documentId');
+    if (documentSelect && selectedDocument) documentSelect.value = selectedDocument;
+    if (typeof syncSendFlow === 'function') syncSendFlow();
 
     if (documentSelect) {
 
@@ -1521,6 +1538,7 @@ async function initSendPage() {
 
 async function previewSelectedDocumentForSend() {
     if (sendInProgress) return;
+    if (document.getElementById('includeSenderSignature')?.checked) return prepareOwnDocumentSignature();
 
     const documentId =
         document
@@ -1693,6 +1711,7 @@ function validateSignaturePosition(position) {
 
 async function sendDocumentToUser() {
     if (sendInProgress) return;
+    if (document.getElementById("includeSenderSignature")?.checked && !pendingSenderSignature && !pendingSend) return;
     const documentId = document.getElementById('sendDocumentId')?.value;
     const receiverId = document.getElementById('sendReceiverId')?.value;
     const msg = document.getElementById('sendMsg');
@@ -1703,6 +1722,7 @@ async function sendDocumentToUser() {
         return;
     }
     sendInProgress = true;
+    if (typeof syncSendFlow === "function") syncSendFlow();
     controls.forEach(control => control.disabled = true);
     try {
         if (pendingSend && (pendingSend.documentId !== documentId || pendingSend.receiverId !== receiverId)) {
@@ -1726,6 +1746,8 @@ async function sendDocumentToUser() {
         }
         pendingSend = null;
         pendingSenderSignature = null;
+        const signatureOption = document.getElementById('includeSenderSignature');
+        if (signatureOption) signatureOption.checked = false;
         clearEmbeddedViewer();
         document.getElementById('sendDocumentId').value = '';
         document.getElementById('sendReceiverId').value = '';
@@ -1747,6 +1769,7 @@ async function sendDocumentToUser() {
             document.getElementById('sendDocumentId').disabled = true;
             document.getElementById('sendReceiverId').disabled = true;
         }
+        if (typeof syncSendFlow === 'function') syncSendFlow();
     }
 }
 
@@ -1772,7 +1795,7 @@ async function loadInbox() {
 
     try {
 
-        const transfers =
+        let transfers =
             await apiRequest(
                 `/api/transfers/inbox?t=${Date.now()}`,
                 {
@@ -1785,6 +1808,10 @@ async function loadInbox() {
                         )
                 }
             );
+
+        const filter = document.getElementById('inboxFilter')?.value || 'all';
+        if (filter === 'pending') transfers = transfers.filter(item => item.status === 'SENT' || item.status === 'READ');
+        if (filter === 'returned') transfers = transfers.filter(item => item.status === 'RETURNED');
 
         const tbody =
             document.querySelector(
@@ -1911,34 +1938,10 @@ async function loadInbox() {
 
                             <div class="action-row">
 
-                                <button
-                                    class="btn-secondary small-btn"
-                                    onclick="previewReceivedTransfer(
-                                        '${item.id}',
-                                        '${item.documentId}',
-                                        '${item.status}'
-                                    )"
-                                >
-                                    Visualizar
+                                <button class="${canSign ? 'btn-primary' : 'btn-secondary'} small-btn"
+                                    onclick="${canSign ? 'prepareTransferSignature' : 'previewReceivedTransfer'}('${item.id}', '${item.documentId}')">
+                                    ${canSign ? 'Abrir e assinar' : 'Visualizar'}
                                 </button>
-
-                                ${
-                                    canSign
-                                        ?
-                                        `
-                                            <button
-                                                class="btn-primary small-btn"
-                                                onclick="prepareTransferSignature(
-                                                    '${item.id}',
-                                                    '${item.documentId}'
-                                                )"
-                                            >
-                                                Assinar
-                                            </button>
-                                        `
-                                        :
-                                        ""
-                                }
 
                             </div>
 
@@ -2090,6 +2093,12 @@ window.addEventListener('pagehide', releaseViewer);
 async function openEmbeddedViewer(config) {
     if (signatureInProgress) throw new Error('Aguarde a assinatura em andamento.');
     const version = ++viewerVersion;
+    const previous = document.getElementById(embeddedSignState.targetContainerId);
+    if (previous && embeddedSignState.targetContainerId !== config.containerId) {
+        const previousPanel = previous.closest?.('[data-viewer-panel]');
+        if (previousPanel) previousPanel.hidden = true;
+        previous.innerHTML = '';
+    }
     releaseViewer();
 
     embeddedSignState = {
@@ -2152,8 +2161,12 @@ async function openEmbeddedViewer(config) {
         );
     }
 
-    container.innerHTML =
-        "";
+    const panel = container.closest?.('[data-viewer-panel]');
+    if (panel) {
+        panel.hidden = false;
+        panel.scrollIntoView?.({behavior: 'smooth', block: 'start'});
+    }
+    container.innerHTML = "";
 
     if (title) {
 
@@ -2179,6 +2192,7 @@ async function openEmbeddedViewer(config) {
     }
 
     if (confirmButton) {
+        if (config.buttonId === 'confirmOwnSignBtn') confirmButton.hidden = config.mode !== 'own';
 
         confirmButton.disabled =
             true;
@@ -2215,7 +2229,7 @@ async function openEmbeddedViewer(config) {
     ) {
 
         throw new Error(
-            "Somente documentos PDF podem ser assinados."
+            config.mode === "view" ? "A visualização está disponível para PDFs. Use Baixar para outros arquivos." : "Somente documentos PDF podem ser assinados."
         );
     }
 
@@ -2398,6 +2412,10 @@ function handleSignaturePlacement(
 
     embeddedSignState.y =
         pdfY;
+    if (embeddedSignState.mode === 'own') {
+        pendingSenderSignature = {documentId: embeddedSignState.documentId, page: pageNumber, x: pdfX, y: pdfY};
+        if (typeof syncSendFlow === 'function') syncSendFlow();
+    }
 
     if (
         embeddedSignState.previewEl
@@ -2472,7 +2490,7 @@ function handleSignaturePlacement(
     if (info) {
 
         info.innerText =
-            `Assinatura posicionada na página ${pageNumber}. Clique em Confirmar Assinatura.`;
+            `Assinatura posicionada na página ${pageNumber}. ${embeddedSignState.mode === "own" ? "Pronto para assinar e enviar." : "Confira a posição e clique em Assinar e devolver."}`;
     }
 
     const button =
@@ -2486,6 +2504,7 @@ function handleSignaturePlacement(
         button.disabled =
             false;
     }
+    if (embeddedSignState.mode === 'own' && typeof syncSendFlow === 'function') syncSendFlow();
 }
 
 
@@ -2670,9 +2689,8 @@ async function confirmEmbeddedSignature() {
             clearEmbeddedViewer();
 
 
-            alert(
-                "Documento assinado e devolvido com sucesso."
-            );
+            if (typeof showToast === 'function') showToast('Documento assinado e devolvido ao remetente.');
+            else alert('Documento assinado e devolvido com sucesso.');
 
             return;
         }
@@ -2698,7 +2716,7 @@ async function confirmEmbeddedSignature() {
                 false;
 
             button.innerText =
-                "Confirmar Assinatura";
+                "Assinar e devolver";
         }
     }
     finally { signatureInProgress = false; }
@@ -2710,6 +2728,10 @@ async function confirmEmbeddedSignature() {
 ===================================================== */
 
 function clearEmbeddedViewer() {
+    const previousContainer = document.getElementById(embeddedSignState.targetContainerId || 'embeddedPdfContainer');
+    const previousPanel = previousContainer?.closest?.('[data-viewer-panel]');
+    if (previousPanel) previousPanel.hidden = true;
+    if (previousContainer) previousContainer.innerHTML = '';
     ++viewerVersion;
     releaseViewer();
 
@@ -2858,6 +2880,7 @@ async function loadFolders() {
     grid.innerHTML =
         "";
 
+    if (!categories.length) grid.innerHTML = '<p class="section-description">Nenhuma categoria cadastrada. As pastas aparecem aqui quando uma categoria é criada.</p>';
     categories.forEach(
         category => {
 
@@ -2866,8 +2889,13 @@ async function loadFolders() {
                     "div"
                 );
 
-            card.className =
-                "folder-card";
+            card.className = 'folder-card';
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', 'Abrir pasta ' + category.name);
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); }
+            });
 
             card.innerHTML = `
 
@@ -2976,6 +3004,8 @@ async function loadDocumentsByCategory(
     tbody.innerHTML =
         "";
 
+    updateCollectionVisibility('categoryDocumentsTable', 'folderDocumentsEmptyState', documents.length);
+
     documents.forEach(
         doc => {
 
@@ -3064,6 +3094,8 @@ async function loadAudit() {
 
     tbody.innerHTML =
         "";
+
+    updateCollectionVisibility('auditTable', 'auditEmptyState', data.length);
 
     data.forEach(
         item => {
@@ -3164,7 +3196,7 @@ async function renderReturnedTransfers() {
     try {
         const transfers = await apiRequest('/api/transfers/returned', {cache: 'no-store'});
         if (token !== getToken()) return;
-        if (!Array.isArray(transfers)) throw new Error('Resposta inv?lida de /api/transfers/returned: era esperado um array.');
+        if (!Array.isArray(transfers)) throw new Error('Resposta inválida de /api/transfers/returned: era esperado um array.');
         body.replaceChildren();
         let count = 0;
         for (const item of transfers) {
@@ -3204,9 +3236,11 @@ async function renderReturnedTransfers() {
             row.appendChild(action);
             body.appendChild(row);
         }
+        const counter = document.getElementById('returnedDocumentsCount');
+        if (counter) counter.textContent = count;
         if (!count) body.innerHTML = '<tr><td colspan="4">Nenhum documento devolvido para esta conta de remetente.</td></tr>';
         if (feedback) feedback.textContent = (account ? 'Conta: ' + account + '. ' : '') + count +
-            ' documento(s) assinado(s) e devolvido(s). Atualizado ?s ' + new Date().toLocaleTimeString('pt-BR') + '.';
+            ' documento(s) assinado(s) e devolvido(s). Atualizado às ' + new Date().toLocaleTimeString('pt-BR') + '.';
     } catch (error) {
         if (token !== getToken()) return;
         const message = formatRequestFailure(error, '/api/transfers/returned');
@@ -3220,7 +3254,7 @@ async function renderReturnedTransfers() {
 }
 
 function formatRequestFailure(error, path) {
-    return 'GET ' + API + path + (error.status ? ' ? HTTP ' + error.status : '') + ': ' + error.message;
+    return 'GET ' + API + path + (error.status ? ' — HTTP ' + error.status : '') + ': ' + error.message;
 }
 
 // Only log transfer response fields; never log request headers or authentication tokens.
@@ -3257,3 +3291,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem('authError');
     }
 });
+
+function updateCollectionVisibility(tableId, emptyId, count) {
+    const table = document.getElementById(tableId);
+    const wrapper = table?.closest?.('.table-wrapper');
+    const empty = document.getElementById(emptyId);
+    if (wrapper) wrapper.style.display = count ? 'block' : 'none';
+    if (empty) empty.style.display = count ? 'none' : 'block';
+}
