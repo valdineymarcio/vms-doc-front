@@ -242,3 +242,103 @@ test('returned API failure identifies method, URL, HTTP status and backend messa
     assert.match(message,/Access denied/);
     assert.equal(message.includes('test-token'),false);
 });
+
+function folderSetup() {
+    const h = setup();
+    const wrapper = h.element();
+    for(const id of ['folderDocumentSearch','folderSearchScope','folderDocumentsSection','folderDocumentsEmptyState',
+        'folderSearchFeedback','folderSearchButton','expandFolderSearchButton','selectedCategoryTitle',
+        'selectedCategoryDescription','closeFolderResultsButton','folderEmptyTitle','folderEmptyDescription',
+        'clearFolderSearchButton','categoryDocumentsTable','folderSearchForm']) {
+        const element = h.element(); element.dataset={}; element.hidden=false;
+        element.setAttribute = (key,value) => {element[key]=value;};
+        element.focus = () => {};
+        element.closest = () => wrapper;
+        h.elements.set(id,element);
+    }
+    const body = h.element(); body.replaceChildren = function(){this.children=[];}; body.closest = () => wrapper;
+    h.context.document.querySelector = selector => selector === '#categoryDocumentsTable tbody' ? body : null;
+    h.context.document.createElement = () => {const element=h.element();element.setAttribute=()=>{};return element;};
+    h.elements.get('folderSearchForm').reset = () => {
+        h.elements.get('folderDocumentSearch').value='';h.elements.get('folderSearchScope').value='';
+    };
+    h.run("folderCategories = [{id:'category',name:'Contratos',description:'Acordos da empresa'}]");
+    return {...h, body, wrapper};
+}
+
+test('folder search sends title and category together with authentication', async () => {
+    const h=folderSetup();
+    h.elements.get('folderDocumentSearch').value=' termo & contrato ';
+    h.elements.get('folderSearchScope').value='category';
+    h.context.fetch=async (url,options)=>{h.calls.push({url,options});return json([{id:'doc',title:'termo & contrato'}]);};
+    await h.run('searchFolderDocuments()');
+    const url=new URL(h.calls[0].url);
+    assert.equal(url.searchParams.get('title'),'termo & contrato');
+    assert.equal(url.searchParams.get('categoryId'),'category');
+    assert.equal(h.calls[0].options.headers.Authorization,'Bearer test-token');
+    assert.equal(h.body.children.length,1);
+    assert.equal(h.elements.get('selectedCategoryTitle').textContent,'Pasta: Contratos');
+    assert.match(h.elements.get('folderSearchFeedback').textContent,/1 documento encontrado/);
+});
+
+test('empty folder search can expand globally without losing the title', async () => {
+    const h=folderSetup();
+    h.elements.get('folderDocumentSearch').value='nota';
+    h.elements.get('folderSearchScope').value='category';
+    h.context.fetch=async (url,options)=>{h.calls.push({url,options});return json(new URL(url).searchParams.has('categoryId')?[]:[{id:'uncategorized',title:'nota'}]);};
+    await h.run('searchFolderDocuments()');
+    assert.equal(h.elements.get('expandFolderSearchButton').hidden,false);
+    assert.equal(h.wrapper.style.display,'none');
+    await h.run('searchAllFolders()');
+    assert.equal(h.elements.get('folderDocumentSearch').value,'nota');
+    assert.equal(new URL(h.calls[1].url).searchParams.has('categoryId'),false);
+    assert.equal(h.body.children.length,1);
+    assert.equal(h.elements.get('selectedCategoryTitle').textContent,'Todos os documentos');
+});
+
+test('clearing a title keeps the selected folder and restores all its documents', async () => {
+    const h=folderSetup();
+    h.elements.get('folderDocumentSearch').value='contract';
+    h.elements.get('folderSearchScope').value='category';
+    h.context.fetch=async (url,options)=>{h.calls.push({url,options});return json([]);};
+    await h.run('clearFolderSearch()');
+    const url=new URL(h.calls[0].url);
+    assert.equal(url.searchParams.has('title'),false);
+    assert.equal(url.searchParams.get('categoryId'),'category');
+    assert.equal(h.elements.get('clearFolderSearchButton').disabled,true);
+});
+
+test('older folder search responses cannot overwrite the latest results', async () => {
+    const h=folderSetup(); const responses=[];
+    h.context.fetch=()=>new Promise(resolve=>responses.push(resolve));
+    h.elements.get('folderDocumentSearch').value='old';
+    const old=h.run('searchFolderDocuments()');
+    h.elements.get('folderDocumentSearch').value='new';
+    const current=h.run('searchFolderDocuments()');
+    responses[1](json([{id:'new',title:'Latest document'}])); await current;
+    responses[0](json([{id:'old',title:'Outdated document'}])); await old;
+    assert.equal(h.body.children[0].children[0].children[0].textContent,'Latest document');
+    assert.match(h.elements.get('folderSearchFeedback').textContent,/new/);
+    assert.equal(h.elements.get('folderSearchButton').disabled,false);
+});
+
+test('closing results prevents an in-flight response from reopening them', async () => {
+    const h=folderSetup(); let resolve;
+    h.context.fetch=()=>new Promise(done=>resolve=done);
+    const request=h.run('searchFolderDocuments()');
+    h.run('resetFolderSearch()');
+    resolve(json([{id:'doc',title:'Late result'}]));await request;
+    assert.equal(h.elements.get('folderDocumentsSection').style.display,'none');
+    assert.equal(h.body.children.length,0);
+    assert.equal(h.elements.get('folderSearchButton').disabled,false);
+});
+
+test('backend search errors remain distinct from empty results and allow retry', async () => {
+    const h=folderSetup();
+    h.context.fetch=async()=>json({message:'Search unavailable'},500);
+    await h.run('searchFolderDocuments()');
+    assert.match(h.elements.get('folderSearchFeedback').textContent,/Search unavailable/);
+    assert.equal(h.elements.get('folderSearchFeedback').dataset.kind,'error');
+    assert.equal(h.elements.get('folderDocumentsEmptyState').style.display,'none');
+    assert.equal(h.elements.get('folderSearchButton').disabled,false);
+});

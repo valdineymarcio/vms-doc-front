@@ -7,6 +7,7 @@
     <title>Pastas · VMS Docs</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/app.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   </head>
   <body class="workspace-page" onload="runPage('initFoldersPage')">
     <a class="skip-link" href="#mainContent">Ir para o conteúdo</a>
@@ -108,46 +109,74 @@
             <p>Encontre seus documentos por categoria.</p>
           </div>
         </header>
-        <section class="glass-card">
-          <h2 class="section-title">Categorias</h2>
-          <div id="foldersGrid" class="folder-grid">
-          </div>
-        </section>
-        <section class="glass-card" id="folderDocumentsSection" style="display:none">
+        <section class="glass-card folder-search-card" id="folderSearchCard" aria-labelledby="folderSearchHeading">
           <div class="section-header">
             <div>
-              <h2 class="section-title" id="selectedCategoryTitle">Documentos da pasta</h2>
-              <p class="section-description" id="selectedCategoryDescription">
+              <h2 class="section-title" id="folderSearchHeading">Buscar documentos</h2>
+              <p class="section-description">Pesquise pelo título em uma pasta ou em todos os seus documentos.</p>
+            </div>
+          </div>
+          <form id="folderSearchForm" class="filter-bar folder-search-bar" onsubmit="event.preventDefault(); searchFolderDocuments()">
+            <div class="search-field">
+              <label for="folderDocumentSearch">Título do documento</label>
+              <input type="search" id="folderDocumentSearch" placeholder="Ex.: termo de referência" aria-controls="categoryDocumentsTable" oninput="updateFolderSearchControls()">
+            </div>
+            <div class="folder-scope-field">
+              <label for="folderSearchScope">Onde buscar</label>
+              <select id="folderSearchScope" onchange="searchFolderDocuments()" aria-controls="categoryDocumentsTable">
+                <option value="">Todos os documentos</option>
+              </select>
+            </div>
+            <button type="submit" id="folderSearchButton" class="btn-primary">Buscar</button>
+            <button type="button" id="clearFolderSearchButton" class="btn-text" onclick="clearFolderSearch()" disabled>Limpar busca</button>
+          </form>
+          <section class="folder-results" id="folderDocumentsSection" style="display:none" aria-labelledby="selectedCategoryTitle" aria-busy="false">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title" id="selectedCategoryTitle" tabindex="-1">Documentos encontrados</h2>
+                <p class="section-description" id="selectedCategoryDescription"></p>
+              </div>
+              <button type="button" id="closeFolderResultsButton" class="btn-text" onclick="closeSelectedFolder()">Fechar resultados</button>
+            </div>
+            <p class="list-feedback" id="folderSearchFeedback" role="status" aria-live="polite"></p>
+            <div class="table-wrapper">
+              <table class="modern-table" id="categoryDocumentsTable">
+                <thead><tr><th scope="col">Documento</th><th scope="col">Adicionado em</th><th scope="col">Ações</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="folderDocumentsEmptyState" style="display:none">
+              <span class="empty-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>
+              </span>
+              <h3 id="folderEmptyTitle">Nenhum documento encontrado</h3>
+              <p id="folderEmptyDescription">Tente outro título ou amplie a busca.</p>
+              <button type="button" class="btn-secondary" id="expandFolderSearchButton" onclick="searchAllFolders()" hidden>Buscar em todos os documentos</button>
+            </div>
+          </section>
+        </section>
+        <section class="glass-card viewer-card" id="mainDocumentViewerPanel" data-viewer-panel hidden aria-label="Visualizador de documento">
+          <div class="viewer-toolbar">
+            <div>
+              <h2 class="section-title" id="documentViewerTitle">Visualização do documento</h2>
+              <p class="section-description" id="documentViewerInfo" role="status">
               </p>
             </div>
-            <button type="button" class="btn-secondary" onclick="closeSelectedFolder()">Fechar pasta</button>
+            <div class="action-row">
+              <button type="button" class="btn-secondary" onclick="closeDocumentViewer()" aria-label="Fechar visualização">Fechar</button>
+            </div>
           </div>
-          <div class="table-wrapper">
-            <table class="modern-table" id="categoryDocumentsTable">
-              <thead>
-                <tr>
-                  <th scope="col">Documento</th>
-                  <th scope="col">Adicionado em</th>
-                  <th scope="col">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colspan="3" class="loading-cell">Carregando…</td>
-                </tr>
-              </tbody>
-            </table>
+          <div id="documentPdfContainer" class="pdf-container">
           </div>
-          <div class="empty-state" id="folderDocumentsEmptyState" style="display:none">
-            <span class="empty-icon">
-              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H5v20h14V7Z"/>
-                <path d="M14 2v6h5M8 13h8M8 17h6"/>
-              </svg>
-            </span>
-            <h3>Esta pasta está vazia</h3>
-            <p>Associe uma categoria ao adicionar um documento.</p>
+        </section>
+        <section class="glass-card" aria-labelledby="foldersHeading">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title" id="foldersHeading">Suas pastas</h2>
+              <p class="section-description">Abra uma pasta para consultar e buscar apenas os documentos dela.</p>
+            </div>
           </div>
+          <div id="foldersGrid" class="folder-grid"></div>
         </section>
       </main>
     </div>

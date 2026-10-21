@@ -18,6 +18,7 @@ function setFeedback(id, message, kind = '') {
 }
 
 function syncSendFlow() {
+    if (typeof syncSearchableSelects === 'function') syncSearchableSelects();
     const doc = document.getElementById('sendDocumentId');
     if (!doc) return;
     const receiver = document.getElementById('sendReceiverId');
@@ -93,7 +94,7 @@ function onDocumentUploaded(doc) {
     setFeedback('msg', 'Documento salvo. Agora você pode enviá-lo ou consultar sua biblioteca.', 'success');
 }
 
-function closeSelectedFolder() { document.getElementById('folderDocumentsSection').style.display = 'none'; }
+function closeSelectedFolder() { resetFolderSearch(); }
 function clearCategoryForm() {
     document.getElementById('categoryFormCard').reset();
     setFeedback('categoryMsg', '');

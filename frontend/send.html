@@ -121,7 +121,7 @@
             <div class="form-group">
               <label for="sendDocumentId">Documento <span class="required">*</span>
               </label>
-              <select id="sendDocumentId" required>
+              <select id="sendDocumentId" required data-searchable-select data-placeholder="Buscar documento…" data-empty="Nenhum documento encontrado." data-selection-message="Escolha um documento da lista.">
                 <option value="">Carregando documentos…</option>
               </select>
               <a href="upload.html" class="inline-link">Adicionar um novo documento</a>
@@ -129,7 +129,7 @@
             <div class="form-group">
               <label for="sendReceiverId">Destinatário <span class="required">*</span>
               </label>
-              <select id="sendReceiverId" required>
+              <select id="sendReceiverId" required data-searchable-select data-placeholder="Buscar por nome ou e-mail…" data-empty="Nenhum destinatário encontrado." data-selection-message="Escolha um destinatário da lista.">
                 <option value="">Carregando destinatários…</option>
               </select>
               <p class="field-hint">Quem deve receber e assinar este documento.</p>
@@ -177,6 +177,7 @@
     <div id="appToast" class="app-toast" role="status" aria-live="polite" hidden>
     </div>
     <script src="js/api.js"></script>
+    <script src="js/searchable-select.js"></script>
     <script src="js/ui.js"></script>
   </body>
 </html>

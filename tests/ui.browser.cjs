@@ -53,12 +53,20 @@ async function screenshot(name) {
 async function route(event) {
     const url=new URL(event.request.url);
     const method=event.request.method;
-    requests.push({path:url.pathname,method});
+    requests.push({path:url.pathname,search:url.search,method});
     if(method!=='OPTIONS' && !url.pathname.endsWith('/auth/login')) assert.equal(event.request.headers.Authorization || event.request.headers.authorization,'Bearer ui-test');
     let data;
     let binary=false;
+    let status=200;
     if(url.pathname.endsWith('/auth/login')) data={token:'ui-test'};
     else if(url.pathname.endsWith('/auth/me')) data={id:'sender',name:'Ana Silva',email:'ana@example.test',role:'ADMIN'};
+    else if(url.pathname === '/api/documents/search') {
+        const title=(url.searchParams.get('title')||'').toLocaleLowerCase();
+        const category=url.searchParams.get('categoryId');
+        if(title==='falha') {status=500;data={message:'Busca temporariamente indisponível'};}
+        else data=[{...doc,categoryId:'category'},{...doc,id:'outside',title:'Nota fiscal de serviços',categoryId:null}]
+            .filter(item=>(!category || item.categoryId===category) && (!title || item.title.toLocaleLowerCase().includes(title)));
+    }
     else if(url.pathname.endsWith('/view')) {data=pdfBuffer();binary=true;}
     else if(url.pathname.endsWith('/recipients')) data=[{id:'receiver',name:'Bruno Souza',email:'bruno@example.test'}];
     else if(url.pathname.endsWith('/inbox')) data=[{...transfer,id:'received-1',senderName:'Carlos Lima',status:signed?'RETURNED':'SENT',sentAt:'2026-10-20T09:00:00Z'}];
@@ -72,7 +80,7 @@ async function route(event) {
     else if(url.pathname.includes('/documents')) data=method==='POST'?doc:[doc];
     else data=[];
     const payload=method==='OPTIONS'?Buffer.alloc(0):binary?data:Buffer.from(JSON.stringify(data));
-    await send('Fetch.fulfillRequest',{requestId:event.requestId,responseCode:method==='OPTIONS'?204:200,
+    await send('Fetch.fulfillRequest',{requestId:event.requestId,responseCode:method==='OPTIONS'?204:status,
         responseHeaders:[{name:'Content-Type',value:binary?'application/pdf':'application/json'},
             {name:'Access-Control-Allow-Origin',value:new URL(base).origin},
             {name:'Access-Control-Allow-Headers',value:'Authorization, Content-Type'},
@@ -96,6 +104,7 @@ async function route(event) {
         else if(data.method==='Runtime.exceptionThrown')browserErrors.push(data.params.exceptionDetails.exception?.description || data.params.exceptionDetails.text);
     };
     await send('Page.enable'); await send('Runtime.enable');
+    await send('Emulation.setFocusEmulationEnabled',{enabled:true});
     await send('Fetch.enable',{patterns:[{urlPattern:'http://localhost:8080/*',requestStage:'Request'}]});
     await send('Page.addScriptToEvaluateOnNewDocument',{source:"localStorage.setItem('token','ui-test');localStorage.setItem('vmsdocs-theme','light');"});
     await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
@@ -115,6 +124,54 @@ async function route(event) {
     await send('Page.navigate',{url:base+'send.html?documentId=doc-1'});
     await waitFor("document.getElementById('sendDocumentId')?.value === 'doc-1'");
     assert.equal(await evaluate("document.getElementById('sendButton').disabled"),true);
+    await waitFor("document.getElementById('sendDocumentIdSearch')?.value.includes('Contrato')");
+    const requestCountBeforeSearch=requests.length;
+    await evaluate("{const docs=document.getElementById('sendDocumentId'),recipients=document.getElementById('sendReceiverId');for(let i=0;i<150;i++){const d=new Option('Documento '+i,'document-'+i);d.dataset.label='Documento '+i;docs.add(d);const r=new Option('Pessoa '+i,'person-'+i);r.dataset.label='Pessoa '+i;r.dataset.detail='pessoa'+i+'@example.test';recipients.add(r);}const d=new Option('Relatório de execução','accent-doc');d.dataset.label='Relatório de execução';docs.add(d);}");
+    await evaluate("document.getElementById('sendDocumentIdSearch').focus();document.getElementById('sendDocumentIdSearch').click()");
+    assert.equal(await evaluate("document.querySelectorAll('#sendDocumentIdOptions [role=option]').length"),60);
+    await evaluate("{const input=document.getElementById('sendDocumentIdSearch');input.value='relatorio execucao';input.dispatchEvent(new Event('input',{bubbles:true}));}");
+    assert.equal(await evaluate("document.getElementById('sendDocumentId').value"),'');
+    assert.equal(await evaluate("document.querySelectorAll('#sendDocumentIdOptions [role=option]').length"),1);
+    await evaluate("document.getElementById('sendDocumentIdSearch').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}))");
+    assert.equal(await evaluate("document.getElementById('sendDocumentId').value"),'accent-doc');
+    assert.equal(await evaluate("document.getElementById('sendDocumentIdSearch').validity.valid"),true);
+    await evaluate("{const input=document.getElementById('sendReceiverIdSearch');input.focus();input.value='pessoa149@example.test';input.dispatchEvent(new Event('input',{bubbles:true}));}");
+    assert.equal(await evaluate("document.querySelectorAll('#sendReceiverIdOptions [role=option]').length"),1);
+    await evaluate("document.getElementById('sendReceiverIdSearch').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}))");
+    assert.equal(await evaluate("document.getElementById('sendReceiverId').value"),'person-149');
+    await evaluate("document.getElementById('sendDocumentIdSearch').focus()");
+    assert.equal(await evaluate("document.getElementById('sendDocumentIdSearch').getAttribute('aria-expanded')"),'true');
+    await evaluate("{const input=document.getElementById('sendDocumentIdSearch');input.value='Documento 14';input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));}");
+    assert.equal(await evaluate("document.getElementById('sendDocumentId').value"),'document-114');
+    await evaluate("document.querySelector('#sendDocumentIdSearch').closest('.searchable-select').querySelector('.select-clear').click()");
+    assert.equal(await evaluate("document.getElementById('sendDocumentId').value"),'');
+    assert.equal(await evaluate("document.getElementById('sendDocumentIdSearch').value"),'');
+
+    await evaluate("{const input=document.getElementById('sendReceiverIdSearch');input.value='ninguem-encontrado';input.dispatchEvent(new Event('input',{bubbles:true}));}");
+    assert.equal(await evaluate("document.querySelector('#sendReceiverIdOptions .searchable-select-empty') !== null"),true);
+    assert.equal(await evaluate("document.getElementById('sendReceiverId').value"),'');
+    assert.equal(await evaluate("document.getElementById('sendButton').disabled"),true);
+    assert.equal(await evaluate("document.getElementById('sendReceiverIdSearch').validity.valid"),false);
+    await evaluate("document.getElementById('sendReceiverIdSearch').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}))");
+    assert.equal(await evaluate("document.getElementById('sendReceiverIdSearch').getAttribute('aria-expanded')"),'false');
+    await evaluate("{const input=document.getElementById('sendDocumentIdSearch');input.value='contrato';input.dispatchEvent(new Event('input',{bubbles:true}));}");
+    await screenshot('send-document-search');
+    await evaluate("document.getElementById('sendDocumentIdSearch').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}))");
+    assert.equal(await evaluate("document.getElementById('sendDocumentId').value"),'doc-1');
+    await evaluate("{const input=document.getElementById('sendReceiverIdSearch');input.focus();input.value='bruno@example.test';input.dispatchEvent(new Event('input',{bubbles:true}));}");
+    await screenshot('send-recipient-search');
+    await evaluate("document.querySelector('#sendReceiverIdOptions [role=option]').click()");
+    assert.equal(await evaluate("document.getElementById('sendReceiverId').value"),'receiver');
+    assert.equal(requests.length,requestCountBeforeSearch);
+    await evaluate('clearSendForm()');
+    await waitFor("document.getElementById('sendDocumentIdSearch').value==='' && document.getElementById('sendReceiverIdSearch').value===''");
+    assert.equal(await evaluate("document.getElementById('sendButton').disabled"),true);
+    await evaluate("document.getElementById('sendDocumentId').value='doc-1';document.getElementById('sendDocumentId').dispatchEvent(new Event('change'))");
+    await evaluate("document.getElementById('sendDocumentId').disabled=true");
+    await waitFor("document.getElementById('sendDocumentIdSearch').disabled");
+    await evaluate("document.getElementById('sendDocumentId').disabled=false");
+    await waitFor("!document.getElementById('sendDocumentIdSearch').disabled");
+
     await evaluate("document.getElementById('sendReceiverId').value='receiver';document.getElementById('sendReceiverId').dispatchEvent(new Event('change'))");
     assert.equal(await evaluate("document.getElementById('sendButton').disabled"),false);
     await screenshot('send-desktop');
@@ -131,6 +188,10 @@ async function route(event) {
     assert.equal(requests.filter(request=>request.path.endsWith('/sign-sender')&&request.method==='PATCH').length,1);
     await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
     await screenshot('send-mobile');
+    await evaluate("document.getElementById('sendReceiverIdSearch').focus();document.getElementById('sendReceiverIdSearch').click()");
+    assert.equal(await evaluate("(()=>{const r=document.querySelector('#sendReceiverIdSearch').closest('.searchable-select').querySelector('.searchable-select-popup').getBoundingClientRect();return r.left>=0 && r.right<=window.innerWidth;})()"),true);
+    await screenshot('send-recipient-search-mobile');
+    await evaluate("document.getElementById('sendReceiverIdSearch').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}))");
     assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'),true);
     await evaluate("document.getElementById('navigationToggle').click()");
     assert.equal(await evaluate("document.body.classList.contains('navigation-open')"),true);
@@ -142,6 +203,54 @@ async function route(event) {
         assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'),true,file+' mobile overflow');
         await screenshot(file.replace('.html','')+'-mobile');
     }
+    await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+    await send('Page.navigate',{url:base+'folders.html'});
+    await waitFor("document.querySelector('#foldersGrid [data-category-id]') !== null");
+    await evaluate("document.getElementById('folderDocumentSearch').value='nota';document.getElementById('folderSearchForm').requestSubmit()");
+    await waitFor("document.getElementById('folderSearchFeedback').textContent.includes('1 documento encontrado')");
+    assert.equal(await evaluate("document.querySelector('#categoryDocumentsTable tbody').textContent.includes('Nota fiscal')"),true);
+    await evaluate("document.querySelector('#categoryDocumentsTable [data-document-view]').click()");
+    await waitFor("document.querySelector('#documentPdfContainer canvas') !== null");
+    assert.equal(requests.some(request => request.path === '/api/documents/outside/view'),true);
+    await evaluate('closeDocumentViewer()');
+    assert.equal(await evaluate("document.getElementById('folderDocumentSearch').value"),'nota');
+    assert.equal(await evaluate("document.getElementById('folderSearchScope').value"),'');
+    await evaluate("document.querySelector('#foldersGrid [data-category-id]').click()");
+    await waitFor("document.getElementById('folderSearchFeedback').textContent.includes('0 documentos encontrados')");
+    assert.equal(await evaluate("document.getElementById('expandFolderSearchButton').hidden"),false);
+    assert.equal(await evaluate("document.getElementById('folderSearchScope').value"),'category');
+    assert.equal(requests.some(request=>request.path==='/api/documents/search' && request.search.includes('title=nota') && request.search.includes('categoryId=category')),true);
+    await screenshot('folder-search-empty-desktop');
+    await evaluate("document.getElementById('expandFolderSearchButton').click()");
+    await waitFor("document.getElementById('folderSearchFeedback').textContent.includes('1 documento encontrado')");
+    assert.equal(await evaluate("document.getElementById('folderDocumentSearch').value"),'nota');
+    assert.equal(await evaluate("document.getElementById('folderSearchScope').value"),'');
+    await evaluate('clearFolderSearch()');
+    await evaluate("document.querySelector('#foldersGrid [data-category-id]').click()");
+    await waitFor("document.getElementById('folderSearchFeedback').textContent.includes('1 documento encontrado')");
+    await evaluate("document.getElementById('folderDocumentSearch').value='Contrato';document.getElementById('folderSearchForm').requestSubmit()");
+    await waitFor("document.getElementById('folderSearchFeedback').textContent.includes('Contrato') && !document.getElementById('folderSearchButton').disabled");
+    await screenshot('folder-search-desktop');
+    await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+    assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'),true);
+    assert.equal(await evaluate("(()=>{const rect=document.querySelector('#categoryDocumentsTable button').getBoundingClientRect();return rect.left>=0 && rect.right<=window.innerWidth;})()"),true);
+    await screenshot('folder-search-mobile');
+    assert.equal(await evaluate("(()=>{const buttons=[...document.querySelectorAll('#categoryDocumentsTable button')];return buttons.length===2 && buttons.every(button=>{const r=button.getBoundingClientRect();return r.left>=0 && r.right<=window.innerWidth;});})()"),true);
+    await evaluate("document.querySelector('#categoryDocumentsTable [data-document-view]').click()");
+    await waitFor("document.querySelector('#documentPdfContainer canvas') !== null");
+    assert.equal(requests.some(request => request.path === '/api/documents/doc-1/view'),true);
+    await screenshot('folder-document-view-mobile');
+    await evaluate('closeDocumentViewer()');
+    assert.equal(await evaluate("document.getElementById('mainDocumentViewerPanel').hidden"),true);
+    assert.equal(await evaluate("document.getElementById('folderDocumentSearch').value"),'Contrato');
+    assert.equal(await evaluate("document.getElementById('folderSearchScope').value"),'category');
+    await evaluate("document.getElementById('folderDocumentSearch').value='falha';document.getElementById('folderSearchForm').requestSubmit()");
+    await waitFor("document.getElementById('folderSearchFeedback').dataset.kind === 'error'");
+    assert.equal(await evaluate("document.getElementById('folderDocumentsEmptyState').style.display"),'none');
+    await evaluate('clearFolderSearch()');
+    assert.equal(await evaluate("document.getElementById('folderSearchScope').value"),'category');
+    await evaluate('closeSelectedFolder()');
+    assert.equal(await evaluate("document.getElementById('folderDocumentsSection').style.display"),'none');
     await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
     await send('Page.navigate',{url:base+'inbox.html'});
     await waitFor("document.querySelector('#inboxTable button') !== null");
@@ -180,7 +289,7 @@ async function route(event) {
     await waitFor("window.location.pathname.endsWith('create-admin.html') && document.readyState === 'complete'");
     await screenshot('setup-desktop');
     assert.deepEqual(browserErrors,[]);
-    console.log(JSON.stringify({passed:true,scenarios:['dashboard tabs','returned authenticated PDF','document deep link','optional sender signature','single send and sign','mobile navigation','six mobile screens without overflow','recipient signs and returns','upload and continue to send','direct returned link','dark theme','login form','setup screen'],artifacts}));
+    console.log(JSON.stringify({passed:true,scenarios:['dashboard tabs','returned authenticated PDF','document deep link','optional sender signature','single send and sign','mobile navigation','six mobile screens without overflow','recipient signs and returns','upload and continue to send','direct returned link','dark theme','login form','setup screen','folder-scoped title search','expand search without losing query','global search includes uncategorized documents','clear and close folder search','folder search HTTP error','folder search mobile','view PDFs inside and outside folders without losing filters','searchable document and recipient fields','accent insensitive and email matching','150 options with bounded menu','keyboard selection and invalid free text','selection sync reset and disabled state','no network calls while filtering'],artifacts}));
 })().catch(error=>{console.error(error);console.error(JSON.stringify({browserErrors,artifacts}));process.exitCode=1;}).finally(async()=>{
     if(socket?.readyState===1) {await send('Browser.close').catch(()=>{});socket.close();}
     browser.kill();

@@ -180,3 +180,56 @@ html[data-theme="light"] .status-signed { color:#176d49; background:#e9f6ef; }
 
 html[data-theme="light"] { color-scheme:light; }
 html[data-theme="dark"] { color-scheme:dark; }
+
+/* A single document search keeps its scope visible when browsing folders. */
+.folder-search-card { scroll-margin-top:24px; }
+.folder-search-bar { align-items:flex-end; margin-bottom:0; }
+.folder-scope-field { flex:0 1 270px; min-width:200px; }
+.folder-search-bar .folder-scope-field select { width:100%; }
+.folder-search-bar>button { margin-bottom:1px; }
+.folder-results { border-top:1px solid var(--border); margin-top:24px; padding-top:24px; }
+.folder-results .section-header { margin-bottom:12px; }
+.folder-results .list-feedback[data-kind="error"] { color:var(--danger); }
+.folder-results .empty-state button { margin-top:18px; }
+.folder-card.is-selected { border-color:var(--primary); background:var(--primary-soft); }
+@media(max-width:760px) {
+  .folder-search-card { scroll-margin-top:80px; }
+  .folder-search-bar .search-field,.folder-scope-field { flex:1 1 100%; min-width:0; }
+  .folder-search-bar>button { flex:1; }
+  .folder-results .section-header { align-items:flex-start; }
+}
+
+@media(max-width:760px) {
+  /* Keep the document and its download action visible without sideways scrolling. */
+  .folder-results .table-wrapper { overflow:visible; }
+  .folder-results .modern-table thead { position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; }
+  .folder-results .modern-table tbody { display:block; }
+  .folder-results .modern-table tbody tr { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px 10px; padding:18px 0; border-bottom:1px solid var(--border); }
+  .folder-results .modern-table tbody tr:last-child { border-bottom:0; }
+  .folder-results .modern-table td { display:block; padding:0; border:0; max-width:none; }
+  .folder-results .modern-table td:first-child { grid-column:1/-1; }
+  .folder-results .modern-table td:nth-child(2) { font-size:12px; }
+  .folder-results .modern-table td:nth-child(2)::before { content:attr(data-label); display:block; color:var(--text-muted); font-size:10px; margin-bottom:3px; }
+  .folder-results .modern-table td:last-child { align-self:end; }
+  .folder-results .modern-table .small-btn { min-height:40px; }
+}
+
+/* Search and selection share one field; the native select still stores its ID. */
+.searchable-select { position:relative; min-width:0; }
+.searchable-select>input { width:100%; padding-right:70px; text-overflow:ellipsis; }
+.searchable-select>input:disabled { opacity:.6; cursor:not-allowed; }
+.searchable-select>input[aria-invalid="true"] { border-color:var(--danger); }
+.select-toggle,.select-clear { position:absolute; top:4px; width:30px; height:34px; min-height:0; padding:0; display:grid; place-items:center; color:var(--text-muted); border:0; background:transparent; border-radius:5px; }
+.select-toggle { right:5px; }
+.select-clear { right:35px; }
+.select-toggle:hover,.select-clear:hover { transform:none; color:var(--text-primary); background:var(--primary-soft); }
+.searchable-select-popup { position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60; background:var(--bg-secondary); border:1px solid var(--border-strong); border-radius:10px; box-shadow:0 10px 28px #0002; overflow:hidden; }
+.searchable-select-popup [role="listbox"] { max-height:min(280px,42vh); overflow-y:auto; overscroll-behavior:contain; padding:5px; }
+.searchable-select-option { padding:10px 12px; border-radius:6px; cursor:pointer; overflow-wrap:anywhere; }
+.searchable-select-option:hover,.searchable-select-option.is-active { background:var(--primary-soft); }
+.searchable-select-option[aria-selected="true"] .select-option-title { color:var(--primary); font-weight:650; }
+.select-option-title { display:block; font-size:13px; color:var(--text-primary); }
+.select-option-detail { display:block; font-size:11px; margin-top:3px; color:var(--text-muted); }
+.searchable-select-empty { margin:0; padding:18px 12px; font-size:13px; color:var(--text-muted); }
+.searchable-select-note { border-top:1px solid var(--border); padding:9px 12px; font-size:11px; color:var(--text-muted); }
+@media(max-width:760px) { .searchable-select-option { padding:13px 12px; } .searchable-select>input { font-size:16px; } }

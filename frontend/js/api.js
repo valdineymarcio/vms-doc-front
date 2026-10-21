@@ -1393,7 +1393,7 @@ async function loadUsersSelect(
             }
 
             select.innerHTML += `
-                <option value="${user.id}">
+                <option value="${escapeHtml(user.id)}" data-label="${escapeHtml(user.name || user.email || "Usuário")}" data-detail="${escapeHtml(user.email || "")}">
                     ${escapeHtml(
                         user.name
                     )}
@@ -1450,7 +1450,7 @@ async function loadDocumentsSelect(
         doc => {
 
             select.innerHTML += `
-                <option value="${doc.id}">
+                <option value="${escapeHtml(doc.id)}" data-label="${escapeHtml(doc.title || "Documento")}" data-detail="${escapeHtml(doc.originalFilename || "")}">
                     ${escapeHtml(doc.title)}
                 </option>
             `;
@@ -2877,6 +2877,22 @@ async function loadFolders() {
         return;
     }
 
+    folderCategories = categories;
+    const scope = document.getElementById('folderSearchScope');
+    if (scope) {
+        scope.replaceChildren();
+        const all = document.createElement('option');
+        all.value = '';
+        all.textContent = 'Todos os documentos';
+        scope.appendChild(all);
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = 'Pasta: ' + category.name;
+            scope.appendChild(option);
+        });
+    }
+
     grid.innerHTML =
         "";
 
@@ -2891,6 +2907,8 @@ async function loadFolders() {
 
             card.className = 'folder-card';
             card.tabIndex = 0;
+            card.dataset.categoryId = category.id;
+            card.setAttribute('aria-pressed', 'false');
             card.setAttribute('role', 'button');
             card.setAttribute('aria-label', 'Abrir pasta ' + category.name);
             card.addEventListener('keydown', event => {
@@ -2938,119 +2956,152 @@ async function loadFolders() {
     );
 }
 
-async function loadDocumentsByCategory(
-    categoryId,
-    categoryName,
-    categoryDescription
-) {
+let folderCategories = [];
+let selectedSearchFolder = null;
+let folderSearchVersion = 0;
 
-    const documents =
-        await apiRequest(
-            `/api/documents/search?categoryId=${encodeURIComponent(categoryId)}`,
-            {
-                method:
-                    "GET",
-
-                headers:
-                    authHeaders(
-                        false
-                    )
-            }
-        );
-
-    const section =
-        document.getElementById(
-            "folderDocumentsSection"
-        );
-
-    if (section) {
-
-        section.style.display =
-            "block";
-    }
-
-    const title =
-        document.getElementById(
-            "selectedCategoryTitle"
-        );
-
-    if (title) {
-
-        title.innerText =
-            `Pasta: ${categoryName}`;
-    }
-
-    const description =
-        document.getElementById(
-            "selectedCategoryDescription"
-        );
-
-    if (description) {
-
-        description.innerText =
-            categoryDescription ||
-            "Sem descrição";
-    }
-
-    const tbody =
-        document.querySelector(
-            "#categoryDocumentsTable tbody"
-        );
-
-    if (!tbody) {
-        return;
-    }
-
-    tbody.innerHTML =
-        "";
-
-    updateCollectionVisibility('categoryDocumentsTable', 'folderDocumentsEmptyState', documents.length);
-
-    documents.forEach(
-        doc => {
-
-            tbody.innerHTML += `
-
-                <tr>
-
-                    <td>
-
-                        <div class="table-title">
-                            ${escapeHtml(
-                                doc.title
-                            )}
-                        </div>
-
-                    </td>
-
-                    <td>
-                        ${formatDate(
-                            doc.createdAt
-                        )}
-                    </td>
-
-                    <td>
-
-                        <button
-                            class="btn-secondary small-btn"
-                            onclick="downloadDocument('${doc.id}')"
-                        >
-                            Download
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `;
-        }
-    );
+function updateFolderSearchControls() {
+    const input = document.getElementById('folderDocumentSearch');
+    const clear = document.getElementById('clearFolderSearchButton');
+    if (clear) clear.disabled = !input?.value;
 }
 
+function updateFolderSelection() {
+    document.querySelectorAll('#foldersGrid [data-category-id]').forEach(card => {
+        const selected = card.dataset.categoryId === selectedSearchFolder?.id;
+        card.classList.toggle('is-selected', selected);
+        card.setAttribute('aria-pressed', String(selected));
+    });
+}
 
-/* =====================================================
-   AUDITORIA
-===================================================== */
+async function loadDocumentsByCategory(categoryId, categoryName, categoryDescription) {
+    selectedSearchFolder = {id: categoryId, name: categoryName, description: categoryDescription};
+    const scope = document.getElementById('folderSearchScope');
+    if (scope) scope.value = categoryId;
+    const loading = searchFolderDocuments();
+    document.getElementById('folderSearchCard')?.scrollIntoView?.({behavior: 'smooth', block: 'start'});
+    document.getElementById('folderDocumentSearch')?.focus?.({preventScroll: true});
+    await loading;
+}
+
+async function searchFolderDocuments() {
+    const version = ++folderSearchVersion;
+    const input = document.getElementById('folderDocumentSearch');
+    const scope = document.getElementById('folderSearchScope');
+    const title = input?.value.trim() || '';
+    const categoryId = scope?.value || '';
+    selectedSearchFolder = folderCategories.find(category => category.id === categoryId) ||
+        (selectedSearchFolder?.id === categoryId ? selectedSearchFolder : null);
+    const folder = selectedSearchFolder;
+    const section = document.getElementById('folderDocumentsSection');
+    const body = document.querySelector('#categoryDocumentsTable tbody');
+    const wrapper = body?.closest('.table-wrapper');
+    const empty = document.getElementById('folderDocumentsEmptyState');
+    const feedback = document.getElementById('folderSearchFeedback');
+    const button = document.getElementById('folderSearchButton');
+    if (!section || !body) return;
+    section.style.display = 'block';
+    section.setAttribute('aria-busy', 'true');
+    if (button) { button.disabled = true; button.textContent = 'Buscando…'; }
+    if (wrapper) wrapper.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+    document.getElementById('expandFolderSearchButton').hidden = true;
+    document.getElementById('selectedCategoryTitle').textContent = folder ? 'Pasta: ' + folder.name : 'Todos os documentos';
+    document.getElementById('selectedCategoryDescription').textContent = folder ? folder.description || 'Documentos desta pasta.' : 'Inclui documentos de todas as pastas e sem categoria.';
+    document.getElementById('closeFolderResultsButton').textContent = folder ? 'Sair da pasta' : 'Fechar resultados';
+    feedback.textContent = folder ? 'Buscando documentos nesta pasta…' : 'Buscando em todos os documentos…';
+    delete feedback.dataset.kind;
+    updateFolderSelection();
+    updateFolderSearchControls();
+    try {
+        const documents = await apiRequest(documentSearchPath(title, categoryId), {cache: 'no-store'});
+        // A previous search or folder selection must never replace the current results.
+        if (version !== folderSearchVersion) return;
+        if (!Array.isArray(documents)) throw new Error('Não foi possível ler a lista de documentos retornada pelo servidor.');
+        body.replaceChildren();
+        for (const doc of documents) {
+            const row = document.createElement('tr');
+            const name = document.createElement('td');
+            const label = document.createElement('div');
+            label.className = 'table-title';
+            label.textContent = doc.title || 'Documento';
+            name.appendChild(label);
+            const date = document.createElement('td');
+            date.textContent = formatDate(doc.createdAt);
+            date.setAttribute('data-label', 'Adicionado em');
+            const action = document.createElement('td');
+            const actions = document.createElement('div');
+            actions.className = 'action-row';
+            const view = document.createElement('button');
+            view.type = 'button';
+            view.className = 'btn-secondary small-btn';
+            view.textContent = 'Visualizar';
+            view.setAttribute('data-document-view', '');
+            view.setAttribute('aria-label', 'Visualizar ' + (doc.title || 'documento'));
+            view.addEventListener('click', async () => {
+                view.disabled = true;
+                try { await openMainDocument(doc.id, doc.title); }
+                finally { view.disabled = false; }
+            });
+            actions.appendChild(view);
+            const download = document.createElement('button');
+            download.type = 'button';
+            download.className = 'btn-secondary small-btn';
+            download.textContent = 'Baixar';
+            download.setAttribute('aria-label', 'Baixar ' + (doc.title || 'documento'));
+            download.addEventListener('click', () => downloadDocument(doc.id));
+            actions.appendChild(download);
+            action.appendChild(actions);
+            row.appendChild(name); row.appendChild(date); row.appendChild(action);
+            body.appendChild(row);
+        }
+        const count = documents.length;
+        feedback.textContent = count + (count === 1 ? ' documento encontrado' : ' documentos encontrados') + (title ? ' para “' + title + '”.' : '.');
+        updateCollectionVisibility('categoryDocumentsTable', 'folderDocumentsEmptyState', count);
+        document.getElementById('folderEmptyTitle').textContent = title ? 'Nenhum documento com esse título' : folder ? 'Esta pasta está vazia' : 'Nenhum documento cadastrado';
+        document.getElementById('folderEmptyDescription').textContent = title ?
+            (folder ? 'Tente outro título ou procure também fora desta pasta.' : 'Tente outro título ou limpe a busca para ver todos os documentos.') :
+            (folder ? 'Você pode procurar o documento nas outras pastas.' : 'Adicione um documento para encontrá-lo aqui.');
+        document.getElementById('expandFolderSearchButton').hidden = count > 0 || !folder;
+    } catch (error) {
+        if (version !== folderSearchVersion) return;
+        body.replaceChildren();
+        feedback.textContent = 'Não foi possível buscar os documentos. ' + error.message;
+        feedback.dataset.kind = 'error';
+    } finally {
+        if (version === folderSearchVersion) {
+            section.setAttribute('aria-busy', 'false');
+            if (button) { button.disabled = false; button.textContent = 'Buscar'; }
+        }
+    }
+}
+
+async function clearFolderSearch() {
+    document.getElementById('folderDocumentSearch').value = '';
+    const loading = searchFolderDocuments();
+    document.getElementById('folderDocumentSearch').focus({preventScroll: true});
+    await loading;
+}
+
+async function searchAllFolders() {
+    document.getElementById('folderSearchScope').value = '';
+    await searchFolderDocuments();
+}
+
+function resetFolderSearch() {
+    ++folderSearchVersion;
+    selectedSearchFolder = null;
+    document.getElementById('folderSearchForm').reset();
+    const section = document.getElementById('folderDocumentsSection');
+    section.style.display = 'none';
+    section.setAttribute('aria-busy', 'false');
+    const button = document.getElementById('folderSearchButton');
+    button.disabled = false;
+    button.textContent = 'Buscar';
+    updateFolderSelection();
+    updateFolderSearchControls();
+    document.getElementById('folderDocumentSearch').focus({preventScroll: true});
+}
 
 async function initAuditPage() {
 
